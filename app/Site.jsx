@@ -807,62 +807,96 @@ function Toast() {
   );
 }
 
-/* ===== DiwaliBanner (home page top: offer + lights + diya animation) ===== */
+/* ===== DiwaliBanner (home page top: offer + lights + 3D diya animation) ===== */
 const DIWALI = {
   show: true,               // false karoge to banner hat jayega
   until: '2026-11-15',      // is date ke baad banner apne aap band
   label: 'Happy Diwali',
   title: 'Diwali Special Offer',
-  text: 'Light up your kitchen with pure & fresh masale. Special festive offers are live on our products!',
+  text: 'Pure & fresh masale at special festive prices!',
   cta: 'Shop Now',
 };
 const DW_COLORS = ['#ff5252', '#ffd740', '#69f0ae', '#40c4ff', '#ff80ab', '#ffab40'];
 const DW_SPARKS = [
-  [6, 38, 0], [16, 70, .6], [30, 30, 1.1], [44, 74, .3], [58, 28, 1.5],
-  [72, 68, .9], [84, 34, .2], [94, 62, 1.3], [50, 46, 1.8], [22, 52, 2.1],
+  [6, 52, 0],
+  [22, 66, 0.6],
+  [36, 50, 1.1],
+  [62, 56, 0.3],
+  [78, 64, 1.5],
+  [93, 50, 0.9],
+  [50, 68, 1.8],
 ];
 
 const DW_CSS = `
-.dwl{position:relative;overflow:hidden;background:radial-gradient(120% 140% at 50% 0%,#8e2a14 0%,#5a1010 45%,#2c0707 100%);color:#fff;border-bottom:3px solid #d9a21b;isolation:isolate}
-.dwl::before{content:'';position:absolute;inset:0;z-index:-1;background:radial-gradient(60% 80% at 50% 110%,#ffb30055,transparent 70%);animation:dwl-glow 3.2s ease-in-out infinite}
-.dwl-lt{list-style:none;display:flex;margin:0;padding:0 2px;height:38px;position:relative;z-index:2}
+.dwl{position:relative;overflow:hidden;background:radial-gradient(120% 150% at 50% 0%,#8e2a14 0%,#5a1010 50%,#2c0707 100%);color:#fff;border-bottom:3px solid #d9a21b;isolation:isolate}
+.dwl-lt{list-style:none;display:flex;margin:0;padding:0 2px;height:30px;position:relative;z-index:3}
 .dwl-lt li{position:relative;flex:1;min-width:0}
-.dwl-lt li::before{content:'';position:absolute;left:-1px;right:-1px;top:-8px;height:16px;border-bottom:2px solid #7a5217;border-radius:0 0 50% 50%}
-.dwl-lt i{position:absolute;left:50%;top:7px;width:10px;height:15px;margin-left:-5px;border-radius:50% 50% 50% 50%/40% 40% 60% 60%;background:var(--c);box-shadow:0 0 8px 2px var(--c),0 0 18px 4px var(--c);animation:dwl-bulb 1.6s ease-in-out infinite;animation-delay:var(--d)}
+.dwl-lt li::before{content:'';position:absolute;left:-1px;right:-1px;top:-8px;height:15px;border-bottom:2px solid #7a5217;border-radius:0 0 50% 50%}
+.dwl-lt i{position:absolute;left:50%;top:6px;width:9px;height:14px;margin-left:-4.5px;border-radius:50% 50% 50% 50%/38% 38% 62% 62%;background:radial-gradient(circle at 35% 28%,#fffc 0 14%,var(--c) 52%);animation:dwl-bulb 1.4s ease-in-out infinite;animation-delay:var(--d)}
 .dwl-lt i::before{content:'';position:absolute;left:50%;top:-4px;width:6px;height:5px;margin-left:-3px;background:#4a3210;border-radius:1px}
-.dwl-sp{position:absolute;z-index:1;width:10px;height:10px;background:#ffe9a8;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);opacity:0;animation:dwl-tw 2.6s ease-in-out infinite}
-.dwl-in{position:relative;z-index:2;max-width:900px;margin:0 auto;padding:6px 12px 20px;display:flex;align-items:center;justify-content:center;gap:clamp(8px,3vw,28px)}
-.dwl-d{flex:0 0 auto;width:clamp(44px,12vw,84px);height:auto;filter:drop-shadow(0 0 10px #ffb300aa);animation:dwl-fl 3.4s ease-in-out infinite}
-.dwl-d.b{animation-delay:-1.7s}
-.dwl-fl{transform-box:fill-box;transform-origin:50% 100%;animation:dwl-flick .9s ease-in-out infinite alternate}
+.dwl-cf{position:absolute;top:-26px;width:84px;height:84px;z-index:2;pointer-events:none;background:radial-gradient(circle,#fff6d6 0 7%,#ffd54acc 18%,#ff9a0044 45%,transparent 70%);animation:dwl-flare 1.4s ease-in-out infinite}
+.dwl-cf.l{left:-26px}.dwl-cf.r{right:-26px;animation-delay:.7s}
+.dwl-sp{position:absolute;z-index:1;width:9px;height:9px;background:#ffe9a8;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);opacity:0;animation:dwl-tw 2.6s ease-in-out infinite}
+.dwl-in{position:relative;z-index:2;max-width:860px;margin:0 auto;padding:2px 10px 12px;display:flex;align-items:center;justify-content:center;gap:clamp(6px,3vw,26px)}
+.dwl-pr{flex:0 0 auto;width:clamp(48px,13vw,92px);perspective:320px}
+.dwl-d{display:block;width:100%;height:auto;overflow:visible;filter:drop-shadow(0 7px 5px #000a);transform-style:preserve-3d;animation:dwl-sway 5.5s ease-in-out infinite}
+.dwl-d.b{animation-delay:-2.7s}
+.dwl-halo{transform-box:fill-box;transform-origin:50% 50%;opacity:0;animation:dwl-lit 7s ease-in-out infinite}
+.dwl-warm{opacity:0;animation:dwl-lit 7s ease-in-out infinite}
+.dwl-burn{transform-box:fill-box;transform-origin:50% 100%;transform:scale(0);animation:dwl-burn 7s ease-in-out infinite}
+.dwl-fl{transform-box:fill-box;transform-origin:50% 100%;animation:dwl-flick .7s ease-in-out infinite alternate}
+.dwl-smoke{opacity:0;animation:dwl-smoke 7s ease-out infinite}
+.dwl-d.b .dwl-halo,.dwl-d.b .dwl-warm,.dwl-d.b .dwl-burn,.dwl-d.b .dwl-smoke{animation-delay:-3.5s}
 .dwl-tx{text-align:center;min-width:0}
-.dwl-tx small{display:block;color:#ffd978;font-size:clamp(10px,2.6vw,13px);font-weight:600;letter-spacing:.28em;text-transform:uppercase;margin-bottom:4px}
-.dwl-tx h2{margin:0;font-family:var(--f-head);font-weight:800;font-size:clamp(24px,7vw,42px);line-height:1.1;background:linear-gradient(100deg,#ffd978 20%,#fff 45%,#ffb300 55%,#ffd978 80%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#ffd978;animation:dwl-shine 3.6s linear infinite}
-.dwl-tx p{margin:6px auto 12px;max-width:520px;color:#f7e6b8;font-size:clamp(12px,3.2vw,15px);line-height:1.55}
-.dwl-tx button{border:0;cursor:pointer;font-family:inherit;font-weight:700;font-size:clamp(13px,3.4vw,15px);color:#4a0c0c;padding:9px 24px;border-radius:999px;background:linear-gradient(#ffe08a,#e9a912);box-shadow:0 3px 0 #a8730b,0 0 0 0 #ffd97866;animation:dwl-pulse 2s ease-out infinite}
-.dwl-tx button:active{transform:translateY(2px);box-shadow:0 1px 0 #a8730b}
-@keyframes dwl-bulb{0%,100%{opacity:1;filter:brightness(1.15)}50%{opacity:.45;filter:brightness(.7)}}
+.dwl-tx small{display:block;color:#ffd978;font-size:clamp(9px,2.4vw,12px);font-weight:600;letter-spacing:.26em;text-transform:uppercase}
+.dwl-tx h2{margin:1px 0 0;font-family:var(--f-head);font-weight:800;font-size:clamp(18px,5.3vw,38px);line-height:1.15;white-space:nowrap;padding:0 2px;background:linear-gradient(100deg,#ffd978 20%,#fff 45%,#ffb300 55%,#ffd978 80%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#ffd978;animation:dwl-shine 3.6s linear infinite}
+.dwl-tx p{margin:3px auto 8px;max-width:460px;color:#f7e6b8;font-size:clamp(10px,2.7vw,14px);line-height:1.4}
+.dwl-tx button{border:0;cursor:pointer;font-family:inherit;font-weight:700;font-size:clamp(12px,3.2vw,14px);color:#4a0c0c;padding:6px 20px;border-radius:999px;background:linear-gradient(#ffe08a,#e9a912);box-shadow:0 2px 0 #a8730b;animation:dwl-pulse 2s ease-out infinite}
+.dwl-tx button:active{transform:translateY(2px);box-shadow:0 0 0 #a8730b}
+@keyframes dwl-bulb{0%,38%{opacity:1;filter:brightness(1.3) saturate(1.2);box-shadow:0 0 6px 2px var(--c),0 0 16px 5px var(--c)}50%,88%{opacity:.9;filter:brightness(.22) saturate(.7);box-shadow:0 0 0 0 transparent}100%{opacity:1;filter:brightness(1.3) saturate(1.2);box-shadow:0 0 6px 2px var(--c),0 0 16px 5px var(--c)}}
+@keyframes dwl-flare{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:1;transform:scale(1.15)}}
 @keyframes dwl-tw{0%,100%{opacity:0;transform:scale(.3) rotate(0)}50%{opacity:1;transform:scale(1.15) rotate(45deg)}}
-@keyframes dwl-flick{0%{transform:scale(1,1) rotate(-3deg)}100%{transform:scale(.92,1.12) rotate(3deg)}}
-@keyframes dwl-fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes dwl-sway{0%,100%{transform:rotateY(-16deg) rotateX(10deg)}50%{transform:rotateY(16deg) rotateX(6deg) translateY(-3px)}}
+@keyframes dwl-burn{0%,4%{transform:scale(0)}10%{transform:scale(.55)}15%{transform:scale(1.12)}19%,84%{transform:scale(1)}90%{transform:scale(.45)}94%,100%{transform:scale(0)}}
+@keyframes dwl-lit{0%,5%{opacity:0}16%,84%{opacity:1}93%,100%{opacity:0}}
+@keyframes dwl-flick{0%{transform:scale(1,1) rotate(-3deg) skewX(2deg)}35%{transform:scale(.94,1.08) rotate(2deg) skewX(-3deg)}70%{transform:scale(1.04,.95) rotate(-2deg) skewX(3deg)}100%{transform:scale(.92,1.12) rotate(3deg) skewX(-2deg)}}
+@keyframes dwl-smoke{0%,89%{opacity:0;transform:translateY(0)}93%{opacity:.7;transform:translateY(-3px)}100%{opacity:0;transform:translateY(-16px)}}
 @keyframes dwl-shine{0%{background-position:120% 0}100%{background-position:-120% 0}}
-@keyframes dwl-glow{0%,100%{opacity:.55}50%{opacity:1}}
-@keyframes dwl-pulse{0%{box-shadow:0 3px 0 #a8730b,0 0 0 0 #ffd978aa}70%,100%{box-shadow:0 3px 0 #a8730b,0 0 0 14px #ffd97800}}
-@media(prefers-reduced-motion:reduce){.dwl *,.dwl::before{animation:none!important}.dwl-sp{opacity:.7}}
+@keyframes dwl-pulse{0%{box-shadow:0 2px 0 #a8730b,0 0 0 0 #ffd978aa}70%,100%{box-shadow:0 2px 0 #a8730b,0 0 0 12px #ffd97800}}
+@media(prefers-reduced-motion:reduce){.dwl *{animation:none!important}.dwl-burn{transform:scale(1)}.dwl-halo,.dwl-warm{opacity:1}.dwl-sp{opacity:.7}}
 `;
 
 function DiwaliDiya({ cls }) {
   return (
-    <svg className={'dwl-d ' + cls} viewBox="0 0 64 64" aria-hidden="true">
-      <g className="dwl-fl">
-        <path d="M32 6c5 7 9 12 9 18a9 9 0 0 1-18 0c0-6 4-11 9-18z" fill="#ff9800" />
-        <path d="M32 14c3 4 5 7 5 10a5 5 0 0 1-10 0c0-3 2-6 5-10z" fill="#fff59d" />
-      </g>
-      <path d="M6 36h52c0 13-11 21-26 21S6 49 6 36z" fill="#b5541c" />
-      <ellipse cx="32" cy="36" rx="26" ry="4" fill="#e8923a" />
-      <ellipse cx="32" cy="36.5" rx="21" ry="2.6" fill="#5b210a" />
-      <path d="M14 46c6 5 30 5 36 0" stroke="#ffd978" strokeWidth="2" strokeLinecap="round" fill="none" opacity=".8" />
-    </svg>
+    <div className="dwl-pr">
+      <svg className={'dwl-d ' + cls} viewBox="0 0 80 74" aria-hidden="true">
+<defs>
+<linearGradient id={`dcl-${cls}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#e8924a"/><stop offset=".38" stopColor="#c4601f"/><stop offset=".75" stopColor="#8a3a12"/><stop offset="1" stopColor="#4e1e08"/></linearGradient>
+<linearGradient id={`dvt-${cls}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fff" stop-opacity=".22"/><stop offset=".45" stopColor="#fff" stop-opacity="0"/><stop offset="1" stopColor="#000" stop-opacity=".45"/></linearGradient>
+<linearGradient id={`drm-${cls}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#f7b36a"/><stop offset=".5" stopColor="#d97a30"/><stop offset="1" stopColor="#7a3010"/></linearGradient>
+<radialGradient id={`doil-${cls}`} cx=".5" cy=".4" r=".6"><stop offset="0" stopColor="#ffb347"/><stop offset=".5" stopColor="#8a3b0c"/><stop offset="1" stopColor="#2a0d03"/></radialGradient>
+<radialGradient id={`dwm-${cls}`} cx=".5" cy=".12" r=".8"><stop offset="0" stopColor="#ffc861" stop-opacity=".95"/><stop offset=".55" stopColor="#ff8a1f" stop-opacity=".35"/><stop offset="1" stopColor="#ff8a1f" stop-opacity="0"/></radialGradient>
+<radialGradient id={`dhl-${cls}`} cx=".5" cy=".5" r=".5"><stop offset="0" stopColor="#ffe08a" stop-opacity=".9"/><stop offset=".4" stopColor="#ffa726" stop-opacity=".4"/><stop offset="1" stopColor="#ff9800" stop-opacity="0"/></radialGradient>
+<linearGradient id={`dfl-${cls}`} x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#3d7bff" stop-opacity=".9"/><stop offset=".18" stopColor="#ff7a00"/><stop offset=".6" stopColor="#ffb300"/><stop offset="1" stopColor="#fff3a0"/></linearGradient>
+<linearGradient id={`dco-${cls}`} x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#fff"/><stop offset="1" stopColor="#fff7b0"/></linearGradient>
+</defs>
+<ellipse className="dwl-halo" cx="40" cy="26" rx="46" ry="40" fill={`url(#dhl-${cls})`}/>
+<path d="M7 40H73C73 57 59 68 40 68S7 57 7 40Z" fill={`url(#dcl-${cls})`}/>
+<path d="M7 40H73C73 57 59 68 40 68S7 57 7 40Z" fill={`url(#dvt-${cls})`}/>
+<path className="dwl-warm" d="M7 40H73C73 57 59 68 40 68S7 57 7 40Z" fill={`url(#dwm-${cls})`}/>
+<ellipse cx="40" cy="40" rx="33" ry="7" fill={`url(#drm-${cls})`}/>
+<ellipse cx="40" cy="41" rx="27" ry="4.8" fill={`url(#doil-${cls})`}/>
+<ellipse className="dwl-warm" cx="40" cy="41" rx="27" ry="4.8" fill="#ffb74d" opacity=".5"/>
+<path d="M17 52C24 62 56 62 63 52" stroke="#ffd978" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity=".75"/>
+<path d="M14 46C19 57 28 63 40 64" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity=".16"/>
+<rect x="39" y="35" width="2" height="6" rx="1" fill="#2b1608"/>
+<path className="dwl-smoke" d="M40 33C37 28 43 25 40 20S42 12 40 8" stroke="#e8e0d8" strokeWidth="1.4" strokeLinecap="round" fill="none"/>
+<g className="dwl-burn"><g className="dwl-fl">
+<path d="M40 4C46 12 51 19 51 26A11 11 0 0 1 29 26C29 19 34 12 40 4Z" fill={`url(#dfl-${cls})`}/>
+<path d="M40 15C43.5 20 45.5 24 45.5 27.5A5.5 5.5 0 0 1 34.5 27.5C34.5 24 36.5 20 40 15Z" fill={`url(#dco-${cls})`}/>
+</g></g>
+</svg>
+    </div>
   );
 }
 
@@ -876,9 +910,11 @@ function DiwaliBanner() {
   return (
     <section className="dwl" aria-label="Diwali offer">
       <style>{DW_CSS}</style>
+      <span className="dwl-cf l" aria-hidden="true" />
+      <span className="dwl-cf r" aria-hidden="true" />
       <ul className="dwl-lt" aria-hidden="true">
         {Array.from({ length: 16 }).map((_, i) => (
-          <li key={i}><i style={{ '--c': DW_COLORS[i % DW_COLORS.length], '--d': (i % 6) * 0.3 + 's' }} /></li>
+          <li key={i}><i style={{ '--c': DW_COLORS[i % DW_COLORS.length], '--d': (i % 4) * 0.35 + 's' }} /></li>
         ))}
       </ul>
       {DW_SPARKS.map((a, i) => (

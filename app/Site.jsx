@@ -828,7 +828,7 @@ const DW_SPARKS = [
 ];
 
 const DW_CSS = `
-.dwl{position:relative;overflow:hidden;background:radial-gradient(120% 150% at 50% 0%,#8e2a14 0%,#5a1010 50%,#2c0707 100%);color:#fff;border-bottom:3px solid #d9a21b;isolation:isolate}
+.dwl{animation:dwl-drop .9s cubic-bezier(.2,.8,.2,1) both;position:relative;overflow:hidden;background:radial-gradient(120% 150% at 50% 0%,#8e2a14 0%,#5a1010 50%,#2c0707 100%);color:#fff;border-bottom:3px solid #d9a21b;isolation:isolate}
 .dwl-lt{list-style:none;display:flex;margin:0;padding:0 2px;height:30px;position:relative;z-index:3}
 .dwl-lt li{position:relative;flex:1;min-width:0}
 .dwl-lt li::before{content:'';position:absolute;left:-1px;right:-1px;top:-8px;height:15px;border-bottom:2px solid #7a5217;border-radius:0 0 50% 50%}
@@ -848,11 +848,15 @@ const DW_CSS = `
 .dwl-smoke{opacity:0;animation:dwl-smoke 7s ease-out infinite}
 .dwl-d.b .dwl-halo,.dwl-d.b .dwl-warm,.dwl-d.b .dwl-burn,.dwl-d.b .dwl-smoke{animation-delay:-3.5s}
 .dwl-tx{text-align:center;min-width:0}
-.dwl-tx small{display:block;color:#ffd978;font-size:clamp(9px,2.4vw,12px);font-weight:600;letter-spacing:.26em;text-transform:uppercase}
-.dwl-tx h2{margin:1px 0 0;font-family:var(--f-head);font-weight:800;font-size:clamp(18px,5.3vw,38px);line-height:1.15;white-space:nowrap;padding:0 2px;background:linear-gradient(100deg,#ffd978 20%,#fff 45%,#ffb300 55%,#ffd978 80%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#ffd978;animation:dwl-shine 3.6s linear infinite}
-.dwl-tx p{margin:3px auto 8px;max-width:460px;color:#f7e6b8;font-size:clamp(10px,2.7vw,14px);line-height:1.4}
-.dwl-tx button{border:0;cursor:pointer;font-family:inherit;font-weight:700;font-size:clamp(12px,3.2vw,14px);color:#4a0c0c;padding:6px 20px;border-radius:999px;background:linear-gradient(#ffe08a,#e9a912);box-shadow:0 2px 0 #a8730b;animation:dwl-pulse 2s ease-out infinite}
+.dwl-tx small{animation:dwl-slL 8s ease-in-out infinite;display:block;color:#ffd978;font-size:clamp(9px,2.4vw,12px);font-weight:600;letter-spacing:.26em;text-transform:uppercase}
+.dwl-tx h2{margin:1px 0 0;font-family:var(--f-head);font-weight:800;font-size:clamp(18px,5.3vw,38px);line-height:1.15;white-space:nowrap;padding:0 2px;background:linear-gradient(100deg,#ffd978 20%,#fff 45%,#ffb300 55%,#ffd978 80%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#ffd978;animation:dwl-shine 3.6s linear infinite,dwl-slL 8s ease-in-out .12s infinite}
+.dwl-tx p{animation:dwl-slR 8s ease-in-out .24s infinite;margin:3px auto 8px;max-width:460px;color:#f7e6b8;font-size:clamp(10px,2.7vw,14px);line-height:1.4}
+.dwl-tx button{border:0;cursor:pointer;font-family:inherit;font-weight:700;font-size:clamp(12px,3.2vw,14px);color:#4a0c0c;padding:6px 20px;border-radius:999px;background:linear-gradient(#ffe08a,#e9a912);box-shadow:0 2px 0 #a8730b;animation:dwl-pulse 2s ease-out infinite,dwl-slU 8s ease-in-out .36s infinite}
 .dwl-tx button:active{transform:translateY(2px);box-shadow:0 0 0 #a8730b}
+@keyframes dwl-drop{0%{opacity:0;transform:translateY(-100%)}100%{opacity:1;transform:none}}
+@keyframes dwl-slL{0%{opacity:0;transform:translateX(-80px)}9%,86%{opacity:1;transform:none}95%,100%{opacity:0;transform:translateX(80px)}}
+@keyframes dwl-slR{0%{opacity:0;transform:translateX(80px)}9%,86%{opacity:1;transform:none}95%,100%{opacity:0;transform:translateX(-80px)}}
+@keyframes dwl-slU{0%{opacity:0;transform:translateY(26px) scale(.7)}9%,86%{opacity:1;transform:none}95%,100%{opacity:0;transform:translateY(-14px) scale(.8)}}
 @keyframes dwl-bulb{0%,38%{opacity:1;filter:brightness(1.3) saturate(1.2);box-shadow:0 0 6px 2px var(--c),0 0 16px 5px var(--c)}50%,88%{opacity:.9;filter:brightness(.22) saturate(.7);box-shadow:0 0 0 0 transparent}100%{opacity:1;filter:brightness(1.3) saturate(1.2);box-shadow:0 0 6px 2px var(--c),0 0 16px 5px var(--c)}}
 @keyframes dwl-flare{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:1;transform:scale(1.15)}}
 @keyframes dwl-tw{0%,100%{opacity:0;transform:scale(.3) rotate(0)}50%{opacity:1;transform:scale(1.15) rotate(45deg)}}
@@ -863,7 +867,6 @@ const DW_CSS = `
 @keyframes dwl-smoke{0%,89%{opacity:0;transform:translateY(0)}93%{opacity:.7;transform:translateY(-3px)}100%{opacity:0;transform:translateY(-16px)}}
 @keyframes dwl-shine{0%{background-position:120% 0}100%{background-position:-120% 0}}
 @keyframes dwl-pulse{0%{box-shadow:0 2px 0 #a8730b,0 0 0 0 #ffd978aa}70%,100%{box-shadow:0 2px 0 #a8730b,0 0 0 12px #ffd97800}}
-@media(prefers-reduced-motion:reduce){.dwl *{animation:none!important}.dwl-burn{transform:scale(1)}.dwl-halo,.dwl-warm{opacity:1}.dwl-sp{opacity:.7}}
 `;
 
 function DiwaliDiya({ cls }) {

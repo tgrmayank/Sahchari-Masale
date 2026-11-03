@@ -9,7 +9,7 @@ a{color:var(--mr)}
 :focus-visible{outline:3px solid var(--gd);outline-offset:2px}
 svg{flex:none}
 .mq{background:var(--gd);color:var(--mr);overflow:hidden;white-space:nowrap;font-size:13px;font-weight:600;padding:6px 0}
-.mq div{display:inline-block;padding-left:100%;animation:mq 40s linear infinite}
+.mq div{display:inline-block;padding-left:100%;animation:mq 26.67s linear infinite}
 .mq span{margin-right:48px}
 .mq span:before{content:"\2726";margin-right:10px}
 @keyframes mq{to{transform:translateX(-100%)}}
@@ -147,7 +147,7 @@ footer .fb img{width:52px;height:52px;border-radius:50%;background:#fff}
 .empty svg{color:var(--gd);margin-bottom:8px}
 @media(min-width:700px){.shop{grid-template-columns:210px 1fr}.cats button{font-size:15px}.grid{grid-template-columns:repeat(3,1fr)}.det{grid-template-columns:1fr 1fr;gap:28px}footer .in{grid-template-columns:1.3fr 1fr 1fr}.brand img{width:116px;height:116px}.tiles{grid-template-columns:repeat(3,1fr)}.cp{}}
 @media(min-width:1000px){.grid{grid-template-columns:repeat(4,1fr)}}
-@media(prefers-reduced-motion:reduce){.mq div{animation-duration:140s}*{transition:none!important}.ok circle,.ok path.ck{animation-duration:.01s}}
+@media(prefers-reduced-motion:reduce){.mq div{animation-duration:93.33s}*{transition:none!important}.ok circle,.ok path.ck{animation-duration:.01s}}
 
 .hero{position:relative;height:clamp(250px,46vw,440px);overflow:hidden;background:#3f0a0a}
 .sls{position:absolute;inset:0}

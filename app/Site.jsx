@@ -807,6 +807,97 @@ function Toast() {
   );
 }
 
+/* ===== DiwaliBanner (home page top: offer + lights + diya animation) ===== */
+const DIWALI = {
+  show: true,               // false karoge to banner hat jayega
+  until: '2026-11-15',      // is date ke baad banner apne aap band
+  label: 'Happy Diwali',
+  title: 'Diwali Special Offer',
+  text: 'Light up your kitchen with pure & fresh masale. Special festive offers are live on our products!',
+  cta: 'Shop Now',
+};
+const DW_COLORS = ['#ff5252', '#ffd740', '#69f0ae', '#40c4ff', '#ff80ab', '#ffab40'];
+const DW_SPARKS = [
+  [6, 38, 0], [16, 70, .6], [30, 30, 1.1], [44, 74, .3], [58, 28, 1.5],
+  [72, 68, .9], [84, 34, .2], [94, 62, 1.3], [50, 46, 1.8], [22, 52, 2.1],
+];
+
+const DW_CSS = `
+.dwl{position:relative;overflow:hidden;background:radial-gradient(120% 140% at 50% 0%,#8e2a14 0%,#5a1010 45%,#2c0707 100%);color:#fff;border-bottom:3px solid #d9a21b;isolation:isolate}
+.dwl::before{content:'';position:absolute;inset:0;z-index:-1;background:radial-gradient(60% 80% at 50% 110%,#ffb30055,transparent 70%);animation:dwl-glow 3.2s ease-in-out infinite}
+.dwl-lt{list-style:none;display:flex;margin:0;padding:0 2px;height:38px;position:relative;z-index:2}
+.dwl-lt li{position:relative;flex:1;min-width:0}
+.dwl-lt li::before{content:'';position:absolute;left:-1px;right:-1px;top:-8px;height:16px;border-bottom:2px solid #7a5217;border-radius:0 0 50% 50%}
+.dwl-lt i{position:absolute;left:50%;top:7px;width:10px;height:15px;margin-left:-5px;border-radius:50% 50% 50% 50%/40% 40% 60% 60%;background:var(--c);box-shadow:0 0 8px 2px var(--c),0 0 18px 4px var(--c);animation:dwl-bulb 1.6s ease-in-out infinite;animation-delay:var(--d)}
+.dwl-lt i::before{content:'';position:absolute;left:50%;top:-4px;width:6px;height:5px;margin-left:-3px;background:#4a3210;border-radius:1px}
+.dwl-sp{position:absolute;z-index:1;width:10px;height:10px;background:#ffe9a8;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);opacity:0;animation:dwl-tw 2.6s ease-in-out infinite}
+.dwl-in{position:relative;z-index:2;max-width:900px;margin:0 auto;padding:6px 12px 20px;display:flex;align-items:center;justify-content:center;gap:clamp(8px,3vw,28px)}
+.dwl-d{flex:0 0 auto;width:clamp(44px,12vw,84px);height:auto;filter:drop-shadow(0 0 10px #ffb300aa);animation:dwl-fl 3.4s ease-in-out infinite}
+.dwl-d.b{animation-delay:-1.7s}
+.dwl-fl{transform-box:fill-box;transform-origin:50% 100%;animation:dwl-flick .9s ease-in-out infinite alternate}
+.dwl-tx{text-align:center;min-width:0}
+.dwl-tx small{display:block;color:#ffd978;font-size:clamp(10px,2.6vw,13px);font-weight:600;letter-spacing:.28em;text-transform:uppercase;margin-bottom:4px}
+.dwl-tx h2{margin:0;font-family:var(--f-head);font-weight:800;font-size:clamp(24px,7vw,42px);line-height:1.1;background:linear-gradient(100deg,#ffd978 20%,#fff 45%,#ffb300 55%,#ffd978 80%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#ffd978;animation:dwl-shine 3.6s linear infinite}
+.dwl-tx p{margin:6px auto 12px;max-width:520px;color:#f7e6b8;font-size:clamp(12px,3.2vw,15px);line-height:1.55}
+.dwl-tx button{border:0;cursor:pointer;font-family:inherit;font-weight:700;font-size:clamp(13px,3.4vw,15px);color:#4a0c0c;padding:9px 24px;border-radius:999px;background:linear-gradient(#ffe08a,#e9a912);box-shadow:0 3px 0 #a8730b,0 0 0 0 #ffd97866;animation:dwl-pulse 2s ease-out infinite}
+.dwl-tx button:active{transform:translateY(2px);box-shadow:0 1px 0 #a8730b}
+@keyframes dwl-bulb{0%,100%{opacity:1;filter:brightness(1.15)}50%{opacity:.45;filter:brightness(.7)}}
+@keyframes dwl-tw{0%,100%{opacity:0;transform:scale(.3) rotate(0)}50%{opacity:1;transform:scale(1.15) rotate(45deg)}}
+@keyframes dwl-flick{0%{transform:scale(1,1) rotate(-3deg)}100%{transform:scale(.92,1.12) rotate(3deg)}}
+@keyframes dwl-fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes dwl-shine{0%{background-position:120% 0}100%{background-position:-120% 0}}
+@keyframes dwl-glow{0%,100%{opacity:.55}50%{opacity:1}}
+@keyframes dwl-pulse{0%{box-shadow:0 3px 0 #a8730b,0 0 0 0 #ffd978aa}70%,100%{box-shadow:0 3px 0 #a8730b,0 0 0 14px #ffd97800}}
+@media(prefers-reduced-motion:reduce){.dwl *,.dwl::before{animation:none!important}.dwl-sp{opacity:.7}}
+`;
+
+function DiwaliDiya({ cls }) {
+  return (
+    <svg className={'dwl-d ' + cls} viewBox="0 0 64 64" aria-hidden="true">
+      <g className="dwl-fl">
+        <path d="M32 6c5 7 9 12 9 18a9 9 0 0 1-18 0c0-6 4-11 9-18z" fill="#ff9800" />
+        <path d="M32 14c3 4 5 7 5 10a5 5 0 0 1-10 0c0-3 2-6 5-10z" fill="#fff59d" />
+      </g>
+      <path d="M6 36h52c0 13-11 21-26 21S6 49 6 36z" fill="#b5541c" />
+      <ellipse cx="32" cy="36" rx="26" ry="4" fill="#e8923a" />
+      <ellipse cx="32" cy="36.5" rx="21" ry="2.6" fill="#5b210a" />
+      <path d="M14 46c6 5 30 5 36 0" stroke="#ffd978" strokeWidth="2" strokeLinecap="round" fill="none" opacity=".8" />
+    </svg>
+  );
+}
+
+function DiwaliBanner() {
+  if (!DIWALI.show) return null;
+  if (DIWALI.until && new Date() > new Date(DIWALI.until + 'T23:59:59')) return null;
+  const goShop = () => {
+    const el = document.querySelector('.shop');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  return (
+    <section className="dwl" aria-label="Diwali offer">
+      <style>{DW_CSS}</style>
+      <ul className="dwl-lt" aria-hidden="true">
+        {Array.from({ length: 16 }).map((_, i) => (
+          <li key={i}><i style={{ '--c': DW_COLORS[i % DW_COLORS.length], '--d': (i % 6) * 0.3 + 's' }} /></li>
+        ))}
+      </ul>
+      {DW_SPARKS.map((a, i) => (
+        <span key={i} className="dwl-sp" aria-hidden="true" style={{ left: a[0] + '%', top: a[1] + '%', animationDelay: a[2] + 's' }} />
+      ))}
+      <div className="dwl-in">
+        <DiwaliDiya cls="a" />
+        <div className="dwl-tx">
+          <small>{DIWALI.label}</small>
+          <h2>{DIWALI.title}</h2>
+          <p>{DIWALI.text}</p>
+          <button type="button" onClick={goShop}>{DIWALI.cta}</button>
+        </div>
+        <DiwaliDiya cls="b" />
+      </div>
+    </section>
+  );
+}
+
 /* ===== SiteShell ===== */
 function SiteShell({ children }) {
   const { loaded, loadErr } = useCat();
@@ -821,6 +912,7 @@ function SiteShell({ children }) {
     <>
       {loadErr ? <div className="lderr">Store data could not be loaded: {loadErr}. Check the .env file and the SQL setup.</div> : null}
       <Marquee />
+      {pathname === '/' ? <DiwaliBanner /> : null}
       {pathname === null ? null : pathname === '/' ? <Hero /> : <MiniHeader />}
       <main id="app">{children}</main>
       <Footer />

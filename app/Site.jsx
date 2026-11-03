@@ -1,6 +1,11 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import logo from './logo.png';
+import procSourcing from './process-1-sourcing.png';
+import procSelection from './process-2-selection.png';
+import procProcessing from './process-3-processing.png';
+import procPackaging from './process-4-packaging.png';
+import procKitchen from './process-5-kitchen.png';
 import { supabase, configured } from '@/lib/supabase';
 import {
   IC, ST, SD, SI, rs, pimg, cimg, packInfo, chk, computeBill, fdate, buildCatalog, mapCoupon,
@@ -198,6 +203,66 @@ function Empty({ icon, title, text, shop = false, children }) {
       ) : null}
       {children}
     </div>
+  );
+}
+
+/* ===== ProcessSection (From Farm To Family) ===== */
+const PROCESS_STEPS = [
+  { img: procSourcing, tag: 'Step 01 / Sourcing', t: 'Freshness Begins At The Source',
+    d: 'Our journey begins with carefully sourced fresh chillies and quality ingredients. We value the natural freshness and quality of every spice that becomes part of Sahchari Masale.', k: 'Fresh Ingredients' },
+  { img: procSelection, tag: 'Step 02 / Selection', t: 'Handpicked Spices, Authentic Flavours',
+    d: 'Every ingredient is carefully inspected and selected for its aroma, freshness and quality. We bring together carefully chosen spices to create the authentic taste of Indian cooking.', k: 'Selected With Care' },
+  { img: procProcessing, tag: 'Step 03 / Processing', t: 'Perfectly Ground For Rich Aroma',
+    d: 'Selected whole spices are processed using modern grinding machinery. Our focus is to preserve the natural colour, rich aroma and distinctive flavour of every spice.', k: 'Quality Processing' },
+  { img: procPackaging, tag: 'Step 04 / Packaging', t: 'Sealed With Care, Packed With Quality',
+    d: 'Our spices are carefully packed using packaging machinery to help maintain their freshness, aroma and quality. Every Sahchari Masale packet is prepared with attention to detail.', k: 'Freshness In Every Pack' },
+  { img: procKitchen, tag: 'Step 05 / Your Kitchen', t: 'Bringing Happiness To Every Kitchen',
+    d: 'From our careful selection of ingredients to your favourite homemade recipes, Sahchari Masale brings colour, aroma and authentic Indian flavour to your everyday cooking.', k: 'Made For Your Family' },
+];
+
+const PROCESS_CSS = `
+.fts{max-width:1100px;margin:0 auto;padding:clamp(36px,8vw,80px) 14px clamp(30px,6vw,60px);text-align:center}
+.fts-hd h2{font-family:'Playfair Display',Georgia,serif;font-weight:500;color:#1b4332;font-size:clamp(28px,6vw,46px);line-height:1.2;margin:0 0 12px}
+.fts-hd p{color:#6b6b6b;font-size:clamp(13px,2.4vw,16px);line-height:1.8;max-width:900px;margin:0 auto}
+.fts-row{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:clamp(14px,6vw,90px);padding:clamp(28px,9vw,100px) 0;text-align:left}
+.fts-row.rev .fts-im{order:2}
+.fts-im{display:flex;align-items:center;justify-content:center}
+.fts-im img{width:100%;height:auto;display:block;border:0;border-radius:0;box-shadow:none;background:none}
+.fts-tx small{display:block;color:#9a6b1a;font-size:clamp(8px,1.6vw,12px);font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:clamp(8px,2vw,18px)}
+.fts-tx h3{font-family:'Playfair Display',Georgia,serif;font-weight:500;color:#1b4332;font-size:clamp(18px,4.2vw,34px);line-height:1.25;margin:0 0 clamp(8px,2vw,18px)}
+.fts-tx p{color:#6b6b6b;font-size:clamp(11px,2.1vw,15px);line-height:1.95;margin:0 0 clamp(10px,2vw,18px)}
+.fts-tx em{display:block;font-style:normal;color:#9a6b1a;font-size:clamp(7px,1.5vw,11px);font-weight:700;letter-spacing:.2em;text-transform:uppercase}
+.fts-ft{padding-top:clamp(20px,6vw,60px)}
+.fts-ft h2{font-family:'Playfair Display',Georgia,serif;font-weight:500;color:#1b4332;font-size:clamp(24px,5.4vw,44px);line-height:1.25;margin:0 0 12px}
+.fts-ft p{color:#6b6b6b;font-size:clamp(12px,2.2vw,15px);line-height:1.8;max-width:900px;margin:0 auto}
+`;
+
+function ProcessSection() {
+  return (
+    <section className="fts" aria-label="From farm to family">
+      <style>{PROCESS_CSS}</style>
+      <div className="fts-hd">
+        <h2>From Farm To Family</h2>
+        <p>Every spice has a story. Discover how we carefully source, select, process and pack authentic Indian spices to bring real aroma and flavour to your kitchen.</p>
+      </div>
+      {PROCESS_STEPS.map((st, i) => (
+        <div key={i} className={'fts-row' + (i % 2 ? ' rev' : '')}>
+          <div className="fts-im">
+            <img src={st.img.src || st.img} alt={st.t} loading="lazy" />
+          </div>
+          <div className="fts-tx">
+            <small>{st.tag}</small>
+            <h3>{st.t}</h3>
+            <p>{st.d}</p>
+            <em>{st.k}</em>
+          </div>
+        </div>
+      ))}
+      <div className="fts-ft">
+        <h2>The Taste Of Tradition, The Promise Of Quality.</h2>
+        <p>Sahchari Masale — Bringing authentic Indian flavours and the joy of traditional cooking closer to every family.</p>
+      </div>
+    </section>
   );
 }
 
@@ -881,6 +946,8 @@ function HomeView() {
           )}
         </div>
       </div>
+
+      <ProcessSection />
 
       <WhySection />
 

@@ -1,5 +1,7 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import NextLink from 'next/link';
+import { useRouter as useNextRouter, usePathname as useNextPathname } from 'next/navigation';
 import logo from './logo.png';
 import procSourcing from './process-1-sourcing.png';
 import procSelection from './process-2-selection.png';
@@ -17,28 +19,31 @@ const DEFAULT_LOGO = logo.src || logo;
 const CatCtx = createContext(null);
 const useCat = () => useContext(CatCtx);
 
-/* ---------- Hash routing (#/cart, #/product/3 ...) - koi route folder nahi chahiye ---------- */
-const toHash = (h) => '#' + (h.startsWith('/') ? h : '/' + h);
+/* ---------- Real URL routing (/cart, /orders, /product/3 ...) - koi # nahi ---------- */
+const toPath = (h) => (h.startsWith('/') ? h : '/' + h);
 
 function Link({ href, children, ...rest }) {
-  return <a href={toHash(href)} {...rest}>{children}</a>;
+  return <NextLink href={toPath(href)} {...rest}>{children}</NextLink>;
 }
 function useRouter() {
+  const r = useNextRouter();
   return useMemo(() => ({
-    push: (h) => { window.location.hash = toHash(h); },
-    replace: (h) => { window.location.replace(toHash(h)); },
-  }), []);
+    push: (h) => r.push(toPath(h)),
+    replace: (h) => r.replace(toPath(h)),
+  }), [r]);
 }
 // null = abhi browser me load nahi hua
 function usePathname() {
-  const [p, setP] = useState(null);
+  const np = useNextPathname();
+  const r = useNextRouter();
+  const [ok, setOk] = useState(false);
   useEffect(() => {
-    const f = () => setP(window.location.hash.slice(1) || '/');
-    f();
-    window.addEventListener('hashchange', f);
-    return () => window.removeEventListener('hashchange', f);
-  }, []);
-  return p;
+    // purane shared links (site.in/#/product/3) ko naye URL par bhej do
+    const h = window.location.hash;
+    if (h.startsWith('#/')) r.replace(h.slice(1));
+    setOk(true);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  return ok ? (np || '/') : null;
 }
 
 /* ===== Icon ===== */

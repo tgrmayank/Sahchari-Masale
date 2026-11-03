@@ -656,6 +656,95 @@ function BackToTopBtn() {
 }
 
 /* ===== Footer ===== */
+/* ===== LegalInfo (manufacturer, GST, FSSAI, Make in India) ===== */
+const LEGAL = {
+  name: 'SAHCHARI MASALE',
+  addr: 'Mat Mulla Bangar, P.O. - Mat, Distt. Mathura, U.P.-281202',
+  gst: '09CQBPD3237M1ZS',
+  fssai: '22726130000127',
+  best: '12 months from date of packaging',
+  phone: '+91-8368752030',
+  mail: 'sahcharimasale@gmail.com',
+};
+
+const LEGAL_CSS = `
+.lgi{max-width:1100px;margin:22px auto 0;padding-top:20px;border-top:1px solid #d9a21b55}
+.lgi-top{display:grid;gap:18px}
+.lgi-by small{display:block;color:#d9a21b;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;margin-bottom:6px}
+.lgi-by b{display:block;font-family:var(--f-head);font-size:20px;letter-spacing:.06em;color:#fff;line-height:1.2}
+.lgi-by span{display:block;margin-top:6px;font-size:13px;line-height:1.6;color:#f7e6b8}
+.lgi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lgi-grid div{background:#ffffff0d;border:1px solid #d9a21b33;border-radius:10px;padding:10px 12px;min-width:0}
+.lgi-grid small{display:block;color:#d9a21b;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px}
+.lgi-grid em{display:block;font-style:normal;color:#fff;font-size:13px;font-weight:500;line-height:1.45;word-break:break-word}
+.lgi-grid .wide{grid-column:1/-1}
+.lgi-bd{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch}
+.lgi-bd figure{margin:0;background:#fff;border-radius:10px;padding:8px 12px;display:flex;align-items:center;justify-content:center;flex:1 1 140px;min-height:62px}
+.lgi-bd svg{display:block;height:46px;width:auto;max-width:100%}
+@media(min-width:760px){.lgi-top{grid-template-columns:1fr 1.4fr;align-items:start}.lgi-grid{grid-template-columns:repeat(3,1fr)}.lgi-grid .wide{grid-column:auto}.lgi-bd{grid-column:1/-1;justify-content:center}.lgi-bd figure{flex:0 1 190px}}
+`;
+
+function GstBadge() {
+  return (
+    <svg viewBox="0 0 150 46" role="img" aria-label="GST - Goods and Services Tax">
+      <text x="75" y="26" textAnchor="middle" fontFamily="Arial,Helvetica,sans-serif" fontWeight="800" fontSize="28" fill="#1a237e" letterSpacing="2">GST</text>
+      <rect x="22" y="31" width="35" height="3" fill="#ff9933" />
+      <rect x="57" y="31" width="36" height="3" fill="#d7d7d7" />
+      <rect x="93" y="31" width="35" height="3" fill="#138808" />
+      <text x="75" y="43" textAnchor="middle" fontFamily="Arial,Helvetica,sans-serif" fontWeight="600" fontSize="8" fill="#37474f" letterSpacing=".6">GOODS &amp; SERVICES TAX</text>
+    </svg>
+  );
+}
+function FssaiBadge() {
+  return (
+    <svg viewBox="0 0 150 46" role="img" aria-label="FSSAI licensed">
+      <circle cx="22" cy="21" r="14" fill="#fff" stroke="#138808" strokeWidth="3" />
+      <path d="M14 22c4-9 12-9 16-1-4 6-12 6-16 1z" fill="#f57c00" />
+      <circle cx="22" cy="21" r="3" fill="#138808" />
+      <text x="42" y="25" fontFamily="Arial,Helvetica,sans-serif" fontWeight="800" fontSize="25" fill="#138808" letterSpacing="-.5">fssai</text>
+      <text x="42" y="38" fontFamily="Arial,Helvetica,sans-serif" fontWeight="600" fontSize="8.5" fill="#37474f">Lic. No. {LEGAL.fssai}</text>
+    </svg>
+  );
+}
+function MakeInIndiaBadge() {
+  return (
+    <svg viewBox="0 0 150 46" role="img" aria-label="Make in India">
+      <rect x="4" y="5" width="142" height="4" fill="#ff9933" />
+      <rect x="4" y="9" width="142" height="4" fill="#e8e8e8" />
+      <rect x="4" y="13" width="142" height="4" fill="#138808" />
+      <text x="75" y="33" textAnchor="middle" fontFamily="Arial,Helvetica,sans-serif" fontWeight="800" fontSize="17" fill="#212121" letterSpacing="1.2">MAKE IN INDIA</text>
+      <text x="75" y="42.5" textAnchor="middle" fontFamily="Arial,Helvetica,sans-serif" fontWeight="600" fontSize="7" fill="#546e7a" letterSpacing="1.4">PROUDLY MADE IN BHARAT</text>
+    </svg>
+  );
+}
+
+function LegalInfo() {
+  return (
+    <section className="lgi" aria-label="Manufacturer and license details">
+      <style>{LEGAL_CSS}</style>
+      <div className="lgi-top">
+        <div className="lgi-by">
+          <small>Manufactured &amp; Marketed By:</small>
+          <b>{LEGAL.name}</b>
+          <span>{LEGAL.addr}</span>
+        </div>
+        <div className="lgi-grid">
+          <div><small>GST No.</small><em>{LEGAL.gst}</em></div>
+          <div><small>FSSAI Lic. No.</small><em>{LEGAL.fssai}</em></div>
+          <div className="wide"><small>Best Before</small><em>{LEGAL.best}</em></div>
+          <div><small>Customer Care No.</small><em><a href={`tel:${LEGAL.phone.replace(/[^+\d]/g, '')}`}>{LEGAL.phone}</a></em></div>
+          <div className="wide"><small>E-mail</small><em><a href={`mailto:${LEGAL.mail}`}>{LEGAL.mail}</a></em></div>
+        </div>
+        <div className="lgi-bd">
+          <figure><GstBadge /></figure>
+          <figure><FssaiBadge /></figure>
+          <figure><MakeInIndiaBadge /></figure>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Footer() {
   const { BN, TAGLINE, PH, WA, MAIL, IG, IGH, ADDR, LOGO } = useCat();
   return (
@@ -697,6 +786,7 @@ function Footer() {
           <p style={{ marginTop: 14 }}><Icon name="cash" size={16} />Cash on Delivery available</p>
         </div>
       </div>
+      <LegalInfo />
       <div className="cp">
         <span suppressHydrationWarning>© {new Date().getFullYear()} {BN}. All rights reserved.</span>
         <BackToTopBtn />

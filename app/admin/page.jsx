@@ -10,6 +10,7 @@ import Categories from './sections/Categories';
 import Banners from './sections/Banners';
 import Coupons from './sections/Coupons';
 import Reviews from './sections/Reviews';
+import Account from './sections/Account';
 import { Delivery, StoreInfo, HomeContent, Policies } from './sections/Settings';
 
 const NAV = [
@@ -25,6 +26,7 @@ const NAV = [
   ['store', 'Store & Contact', 'shop', StoreInfo],
   ['content', 'Homepage Text', 'text', HomeContent],
   ['policies', 'Terms & Privacy', 'file', Policies],
+  ['account', 'Email & Password', 'file', Account],
 ];
 
 function Shell({ email, onLogout }) {

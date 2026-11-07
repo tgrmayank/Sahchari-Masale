@@ -2037,10 +2037,11 @@ function OrderBox({ o, full = false }) {
 
 /* ===== TrackView ===== */
 function TrackView({ id = '' }) {
-  const { ready, orderIds } = useStore();
+  const { ready, orderIds, addr } = useStore();
   const router = useRouter();
   const [o, setO] = useState(null);
-  const [state, setState] = useState('idle'); // idle | load | done
+  const [state, setState] = useState('idle'); // idle | need | load | done
+  const [l4, setL4] = useState(''); // last 4 digits of the order's mobile number (kept in memory only, never in the URL)
 
   let oid = id;
   try { oid = decodeURIComponent(id); } catch {}
@@ -2048,21 +2049,25 @@ function TrackView({ id = '' }) {
 
   useEffect(() => {
     if (!oid || !configured) { setO(null); setState('idle'); return; }
+    // Order ID alone is not enough: the last 4 digits of the order's mobile number are also required
+    if (!/^\d{4}$/.test(l4)) { setO(null); setState('need'); return; }
     let off = false;
     setState('load');
-    supabase.rpc('track_order', { p_id: oid }).then(({ data }) => {
+    supabase.rpc('track_order', { p_id: oid, p_last4: l4 }).then(({ data }) => {
       if (off) return;
       setO(data || null);
       setState('done');
     });
     return () => { off = true; };
-  }, [oid]);
+  }, [oid, l4]);
 
   if (!ready) return <div className="wrap pg pg2" style={{ minHeight: '60vh' }} />;
 
   const submit = (e) => {
     e.preventDefault();
     const v = e.target.t.value.trim();
+    const d = e.target.p.value.replace(/\D/g, '').slice(0, 4);
+    setL4(d);
     router.push(v ? '/track/' + encodeURIComponent(v) : '/track');
   };
 
@@ -2070,14 +2075,36 @@ function TrackView({ id = '' }) {
     <div className="wrap pg pg2">
       <Crumb title="Track Order" />
       <PageHead icon="truck" title="Track Your Order" sub="Enter the Order ID you received after placing your order" />
-      <form className="srch" style={{ margin: '4px 0 14px' }} onSubmit={submit} key={oid}>
-        <Icon name="search" />
-        <input name="t" defaultValue={oid} placeholder="e.g. SM1A2B3C4D5E" aria-label="Order ID" required />
-        <button className="btn" style={{ borderRadius: 0, padding: '12px 22px' }}>Track</button>
+      <form style={{ margin: '4px 0 14px' }} onSubmit={submit} key={oid}>
+        <div className="srch">
+          <Icon name="search" />
+          <input name="t" defaultValue={oid} placeholder="Order ID, e.g. SM1A2B3C4D5E" aria-label="Order ID" autoCapitalize="characters" required />
+        </div>
+        <div className="srch" style={{ marginTop: 8 }}>
+          <Icon name="phone" />
+          <input
+            name="p"
+            defaultValue={l4 || ((addr && addr.phone) || '').replace(/\D/g, '').slice(-4)}
+            placeholder="Last 4 digits of mobile number"
+            aria-label="Last 4 digits of the mobile number used for the order"
+            inputMode="numeric"
+            pattern="[0-9]{4}"
+            maxLength={4}
+            autoComplete="off"
+            required
+          />
+          <button className="btn" style={{ borderRadius: 0, padding: '12px 22px' }}>Track</button>
+        </div>
       </form>
 
       {oid ? (
-        state === 'load' ? (
+        state === 'need' ? (
+          <Empty
+            icon="phone"
+            title="Verify your order"
+            text="For your privacy, enter the last 4 digits of the mobile number used for this order, then tap Track."
+          />
+        ) : state === 'load' ? (
           <div className="ldg" style={{ minHeight: 160 }}><span /></div>
         ) : o ? (
           <>
@@ -2117,7 +2144,7 @@ function TrackView({ id = '' }) {
           <Empty
             icon="search"
             title="Order not found"
-            text={`No order found for "${oid}". Please check the ID and try again.`}
+            text={`No order found for "${oid}" with these last 4 digits. Please check the Order ID and mobile number and try again.`}
           />
         )
       ) : orderIds.length ? (

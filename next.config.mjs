@@ -5,6 +5,9 @@ const NOINDEX_PATHS = ['/cart', '/address', '/payment', '/orders', '/my-data', '
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  compress: true,
+  // CSS ko HTML ke andar inline karta hai -> render-blocking CSS requests khatam
+  experimental: { inlineCss: true },
   // URL same rehta hai (/product/3), par page ek hi normal folder se chalta hai
   async headers() {
     return [{

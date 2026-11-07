@@ -15,7 +15,7 @@ const poppins = Poppins({
 });
 
 /* Optional: set these in .env / Vercel to verify the site in Search Console / Bing Webmaster */
-const GOOGLE_VERIFY = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '';
+const GOOGLE_VERIFY = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || 'RTChC2HS183jngx340dcb9l_U0VM2xsu3IRQt2GU8ic';
 const BING_VERIFY = process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION || '';
 
 const verification = {};

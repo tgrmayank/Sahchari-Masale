@@ -329,6 +329,7 @@ function StoreProvider({ children }) {
   const [ready, setReady] = useState(false);
   const [cart, setCart] = useState([]); // [{id, k (pack index), q}]
   const [orderIds, setOrderIds] = useState([]);
+  const [o4, setO4] = useState({}); // orderId -> last 4 digits of its mobile (this device only, so My Orders / Track open with one tap)
   const [addr, setAddr] = useState({});
   const [coupon, setCoupon] = useState('');
 
@@ -345,6 +346,7 @@ function StoreProvider({ children }) {
   useEffect(() => {
     setCart(load('sm_cart', []));
     setOrderIds(load('sm_oids', []));
+    setO4(load('sm_o4', {}));
     setAddr(load('sm_addr', {}));
     setCoupon(load('sm_coupon', ''));
     setReady(true);
@@ -353,6 +355,7 @@ function StoreProvider({ children }) {
     const onStorage = (e) => {
       if (e.key === 'sm_cart') setCart(load('sm_cart', []));
       if (e.key === 'sm_oids') setOrderIds(load('sm_oids', []));
+      if (e.key === 'sm_o4') setO4(load('sm_o4', {}));
       if (e.key === 'sm_addr') setAddr(load('sm_addr', {}));
       if (e.key === 'sm_coupon') setCoupon(load('sm_coupon', ''));
     };
@@ -362,6 +365,7 @@ function StoreProvider({ children }) {
 
   useEffect(() => { if (ready) save('sm_cart', cart); }, [ready, cart]);
   useEffect(() => { if (ready) save('sm_oids', orderIds); }, [ready, orderIds]);
+  useEffect(() => { if (ready) save('sm_o4', o4); }, [ready, o4]);
   useEffect(() => { if (ready && rememberOk()) save('sm_addr', addr); }, [ready, addr]);
   useEffect(() => { if (ready) save('sm_coupon', coupon); }, [ready, coupon]);
 
@@ -470,13 +474,15 @@ function StoreProvider({ children }) {
     });
     if (error) throw new Error(error.message);
     setOrderIds((o) => [data.id, ...o.filter((x) => x !== data.id)]);
+    const d4 = String((addr && addr.phone) || '').replace(/\D/g, '').slice(-4);
+    if (d4.length === 4) setO4((m) => ({ ...m, [data.id]: d4 }));
     setCart([]);
     setCoupon('');
     return data.id;
   };
 
   const value = {
-    ready, cart, orderIds, addr, coupon, count,
+    ready, cart, orderIds, o4, addr, coupon, count,
     setAddr, setCoupon, setCart, setOrderIds, addLine, bumpBase, changeQty, placeOrder, ensureCoupon,
     filters, setFilters, toast, showToast, hideToast,
   };
@@ -2034,7 +2040,7 @@ function OrderBox({ o, full = false }) {
 
 /* ===== TrackView ===== */
 function TrackView({ id = '' }) {
-  const { ready, orderIds, addr } = useStore();
+  const { ready, orderIds, o4, addr } = useStore();
   const router = useRouter();
   const [o, setO] = useState(null);
   const [state, setState] = useState('idle'); // idle | need | load | done
@@ -2044,19 +2050,22 @@ function TrackView({ id = '' }) {
   try { oid = decodeURIComponent(id); } catch {}
   oid = (oid || '').toUpperCase().trim();
 
+  // digits typed in the form, else the ones saved on this device when the order was placed
+  const eff = /^\d{4}$/.test(l4) ? l4 : (o4 && o4[oid]) || '';
+
   useEffect(() => {
     if (!oid || !configured) { setO(null); setState('idle'); return; }
     // Order ID alone is not enough: the last 4 digits of the order's mobile number are also required
-    if (!/^\d{4}$/.test(l4)) { setO(null); setState('need'); return; }
+    if (!/^\d{4}$/.test(eff)) { setO(null); setState('need'); return; }
     let off = false;
     setState('load');
-    supabase.rpc('track_order', { p_id: oid, p_last4: l4 }).then(({ data }) => {
+    supabase.rpc('track_order', { p_id: oid, p_last4: eff }).then(({ data }) => {
       if (off) return;
       setO(data || null);
       setState('done');
     });
     return () => { off = true; };
-  }, [oid, l4]);
+  }, [oid, eff]);
 
   if (!ready) return <div className="wrap pg pg2" style={{ minHeight: '60vh' }} />;
 
@@ -2081,7 +2090,7 @@ function TrackView({ id = '' }) {
           <Icon name="phone" />
           <input
             name="p"
-            defaultValue={l4 || ((addr && addr.phone) || '').replace(/\D/g, '').slice(-4)}
+            defaultValue={eff || ((addr && addr.phone) || '').replace(/\D/g, '').slice(-4)}
             placeholder="Last 4 digits of mobile number"
             aria-label="Last 4 digits of the mobile number used for the order"
             inputMode="numeric"
@@ -2335,7 +2344,7 @@ function MyDataView() {
   const [done, setDone] = useState('');
   const mail = (subj) => `mailto:${LEGAL.mail}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent('Order IDs: ' + (orderIds || []).join(', ') + '\nMobile: ' + (addr.phone || '') + '\nPlease process my request.')}`;
   const wipe = () => {
-    ['sm_cart', 'sm_oids', 'sm_addr', 'sm_coupon', 'sm_consent'].forEach((k) => { try { localStorage.removeItem(k); } catch {} });
+    ['sm_cart', 'sm_oids', 'sm_o4', 'sm_addr', 'sm_coupon', 'sm_consent'].forEach((k) => { try { localStorage.removeItem(k); } catch {} });
     setAddr({}); setOrderIds([]); setCart([]);
     setDone('Saved data removed from this device.');
   };

@@ -1252,7 +1252,7 @@ function ProductDetail({ id }) {
     let off = false;
     supabase
       .from('reviews')
-      .select('id,name,rating,message,order_id,created_at')
+      .select('id,name,rating,message,verified,created_at')
       .eq('product_id', pid)
       .eq('is_approved', true)
       .order('created_at', { ascending: false })
@@ -1444,7 +1444,7 @@ function ProductDetail({ id }) {
             <div className="pd-av" aria-hidden="true">{((r.name || 'C')[0] || 'C').toUpperCase()}</div>
             <div>
               <b>{r.name}</b> <Stars r={r.rating} size={13} />
-              {r.order_id ? <>{' '}<small style={{ color: 'var(--gr)' }}>Verified purchase</small></> : null}
+              {r.verified ? <>{' '}<small style={{ color: 'var(--gr)' }}>Verified purchase</small></> : null}
               {r.message ? <p>{r.message}</p> : null}
             </div>
           </div>
@@ -1909,12 +1909,9 @@ function RateItem({ o, item }) {
   useEffect(() => {
     if (o.st !== 4 || !item.pid || !configured) { setSeen(true); return; }
     let off = false;
+    // reviews.order_id is private now - this small server function answers "did this order already review this product?"
     supabase
-      .from('reviews')
-      .select('rating,message')
-      .eq('order_id', o.id)
-      .eq('product_id', item.pid)
-      .maybeSingle()
+      .rpc('get_my_review', { p_order: o.id, p_pid: item.pid })
       .then(({ data }) => { if (!off) { setDone(data || null); setSeen(true); } });
     return () => { off = true; };
   }, [o.id, o.st, item.pid]);

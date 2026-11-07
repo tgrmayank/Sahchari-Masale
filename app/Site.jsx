@@ -9,9 +9,11 @@ import procProcessing from './process-3-processing.png';
 import procPackaging from './process-4-packaging.png';
 import procKitchen from './process-5-kitchen.png';
 import { supabase, configured } from '@/lib/supabase';
+import { CookieBanner, rememberOk, logConsent, GRIEVANCE, privacyDoc, termsDoc, refundDoc, shippingDoc } from '@/app/Compliance';
 import {
   IC, ST, SD, SI, rs, pimg, cimg, packInfo, chk, computeBill, fdate, buildCatalog, mapCoupon,
 } from './data';
+import { PAGES, BRAND, productTitle } from '@/lib/seo';
 
 const DEFAULT_LOGO = logo.src || logo;
 
@@ -360,7 +362,7 @@ function StoreProvider({ children }) {
 
   useEffect(() => { if (ready) save('sm_cart', cart); }, [ready, cart]);
   useEffect(() => { if (ready) save('sm_oids', orderIds); }, [ready, orderIds]);
-  useEffect(() => { if (ready) save('sm_addr', addr); }, [ready, addr]);
+  useEffect(() => { if (ready && rememberOk()) save('sm_addr', addr); }, [ready, addr]);
   useEffect(() => { if (ready) save('sm_coupon', coupon); }, [ready, coupon]);
 
   /* ---------- load the shop from Supabase ---------- */
@@ -475,7 +477,7 @@ function StoreProvider({ children }) {
 
   const value = {
     ready, cart, orderIds, addr, coupon, count,
-    setAddr, setCoupon, addLine, bumpBase, changeQty, placeOrder, ensureCoupon,
+    setAddr, setCoupon, setCart, setOrderIds, addLine, bumpBase, changeQty, placeOrder, ensureCoupon,
     filters, setFilters, toast, showToast, hideToast,
   };
   return (
@@ -734,6 +736,7 @@ function LegalInfo() {
           <div className="wide"><small>Best Before</small><em>{LEGAL.best}</em></div>
           <div><small>Customer Care No.</small><em><a href={`tel:${LEGAL.phone.replace(/[^+\d]/g, '')}`}>{LEGAL.phone}</a></em></div>
           <div className="wide"><small>E-mail</small><em><a href={`mailto:${LEGAL.mail}`}>{LEGAL.mail}</a></em></div>
+          <div className="wide"><small>Grievance / Data Protection Contact</small><em>{GRIEVANCE.name}, {LEGAL.phone}, {LEGAL.mail}</em></div>
         </div>
         <div className="lgi-bd">
           <figure><GstBadge /></figure>
@@ -778,12 +781,17 @@ function Footer() {
             <Link href="/contact"><Icon name="phone" size={15} />Contact</Link>
             <Link href="/terms"><Icon name="file" size={15} />Terms &amp; Conditions</Link>
             <Link href="/privacy"><Icon name="lock" size={15} />Privacy Policy</Link>
+            <Link href="/refund"><Icon name="box" size={15} />Replacement &amp; Refund</Link>
+            <Link href="/shipping"><Icon name="truck" size={15} />Shipping &amp; Delivery</Link>
+            <Link href="/my-data"><Icon name="shield" size={15} />My Data &amp; Privacy Rights</Link>
+            <a href="#" onClick={(e) => { e.preventDefault(); window.dispatchEvent(new Event('sm-cookie-open')); }}><Icon name="lock" size={15} />Cookie settings</a>
           </div>
         </div>
         <div>
           <h3>Connect With Us</h3>
           <Social />
           <p style={{ marginTop: 14 }}><Icon name="cash" size={16} />Cash on Delivery available</p>
+          <p><Icon name="shield" size={16} />Your data is never sold or shared</p>
         </div>
       </div>
       <LegalInfo />
@@ -957,6 +965,7 @@ function SiteShell({ children }) {
       <Footer />
       <BottomNav />
       <Toast />
+      <CookieBanner />
     </>
   );
 }
@@ -1565,7 +1574,9 @@ function AddressView() {
     const f = Object.fromEntries(new FormData(e.target));
     if (!/^\d{10}$/.test(f.phone.trim())) return setErr('Enter a valid 10-digit mobile number.');
     if (!/^\d{6}$/.test(f.pin.trim())) return setErr('Enter a valid 6-digit pincode.');
-    setAddr(f);
+    logConsent('order-details+age');
+    const { age, consent, ...clean } = f;
+    setAddr(clean);
     router.push('/payment');
   };
 
@@ -1585,6 +1596,14 @@ function AddressView() {
           <textarea name="line" rows={3} placeholder="House no., street, area" required defaultValue={addr.line || ''} />
         </label>
         <Field name="lm" label="Landmark (optional)" required={false} value={addr.lm} />
+        <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, marginTop: 10 }}>
+          <input type="checkbox" name="age" required style={{ width: 'auto', marginTop: 3 }} />
+          <span>I am 18 years or older, or I am ordering with my parent or guardian's permission.</span>
+        </label>
+        <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, marginTop: 8 }}>
+          <input type="checkbox" name="consent" required style={{ width: 'auto', marginTop: 3 }} />
+          <span>I allow {LEGAL.name} to use my name, phone and address only to deliver this order and share them with the delivery partner for that purpose. I have read the <Link href="/privacy">Privacy Policy</Link>.</span>
+        </label>
         <p id="er" style={{ color: 'var(--rd)', fontSize: 14, marginTop: 8 }} role="alert">{err}</p>
         <br />
         <button className="btn w">Continue to Payment <Icon name="arrow" size={18} /></button>
@@ -2157,7 +2176,7 @@ function Tile({ href, bg, icon, title, sub, ext }) {
 }
 
 function ContactView() {
-  const { PH, WA, MAIL, IG, IGH, MAP, ADDR } = useCat();
+  const { PH, WA, MAIL, IG, IGH, MAP, ADDR, BN } = useCat();
   const send = (e) => {
     e.preventDefault();
     const f = e.target;
@@ -2180,6 +2199,10 @@ function ContactView() {
         <h3><Icon name="send" size={18} />Send us a message</h3>
         <label>Your name<input name="n" required /></label>
         <label>Message<textarea name="m" rows={4} required /></label>
+        <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, marginTop: 8 }}>
+          <input type="checkbox" required style={{ width: 'auto', marginTop: 3 }} />
+          <span>I agree that my name and message are sent to {BN} on WhatsApp only to reply to me. <Link href="/privacy">Privacy Policy</Link></span>
+        </label>
         <br />
         <button className="btn w"><WaIcon size={18} />Send on WhatsApp</button>
       </form>
@@ -2255,12 +2278,67 @@ function PolicyFromDb({ kind }) {
   );
 }
 
+const toSecs = (doc) => doc.sections.map((x, i) => [POL_ICONS[i % POL_ICONS.length], x[0], <Ul key={i} items={x[1]} />]);
+const dbExtra = (d) => ((d && d.sections) || []).map((x) => [x.title, x.items || []]);
+
 function TermsView() {
-  return <PolicyFromDb kind="terms" />;
+  const { S } = useCat();
+  const doc = termsDoc(LEGAL);
+  doc.sections = [...doc.sections, ...dbExtra(S.terms)];
+  return <PolicyPage icon="file" title="Terms & Conditions" sub="Please read before placing an order" intro={doc.intro} chips={doc.chips.map((t, i) => [CHIP_ICONS_T[i % 4], t])} sections={toSecs(doc)} other={['/refund', 'Replacement & Refund', 'box']} />;
 }
 
 function PrivacyView() {
-  return <PolicyFromDb kind="privacy" />;
+  const { S } = useCat();
+  const doc = privacyDoc(LEGAL, dbExtra(S.privacy));
+  return <PolicyPage icon="lock" title="Privacy Policy" sub="Privacy notice in simple words (DPDP Act 2023)" intro={doc.intro} chips={doc.chips.map((t, i) => [CHIP_ICONS_P[i % 4], t])} sections={toSecs(doc)} other={['/my-data', 'My Data & Rights', 'shield']} />;
+}
+
+function RefundView() {
+  const doc = refundDoc(LEGAL);
+  return <PolicyPage icon="box" title="Replacement & Refund Policy" sub="Unboxing video = fast replacement or refund" intro={doc.intro} chips={doc.chips.map((t, i) => [CHIP_ICONS_T[i % 4], t])} sections={toSecs(doc)} other={['/shipping', 'Shipping & Delivery', 'truck']} />;
+}
+
+function ShippingView() {
+  const { S } = useCat();
+  const doc = shippingDoc(LEGAL, S);
+  return <PolicyPage icon="truck" title="Shipping & Delivery Policy" sub="Delivered through our delivery partners" intro={doc.intro} chips={doc.chips.map((t, i) => [CHIP_ICONS_T[i % 4], t])} sections={toSecs(doc)} other={['/refund', 'Replacement & Refund', 'box']} />;
+}
+
+function MyDataView() {
+  const { addr, orderIds, setAddr, setOrderIds, setCart, showToast } = useStore();
+  const [done, setDone] = useState('');
+  const mail = (subj) => `mailto:${LEGAL.mail}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent('Order IDs: ' + (orderIds || []).join(', ') + '\nMobile: ' + (addr.phone || '') + '\nPlease process my request.')}`;
+  const wipe = () => {
+    ['sm_cart', 'sm_oids', 'sm_addr', 'sm_coupon', 'sm_consent'].forEach((k) => { try { localStorage.removeItem(k); } catch {} });
+    setAddr({}); setOrderIds([]); setCart([]);
+    setDone('Saved data removed from this device.');
+  };
+  const dl = () => {
+    const blob = new Blob([JSON.stringify({ address: addr, orderIds }, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'my-data.json'; a.click();
+  };
+  return (
+    <div className="wrap pg" style={{ maxWidth: 660 }}>
+      <PageHead icon="shield" title="My Data & Privacy Rights" sub="See, download, withdraw or delete your data" />
+      <div className="box">
+        <h3><Icon name="pin" size={18} />Saved on this device</h3>
+        <p>{addr.name ? <><b>{addr.name}</b> · {addr.phone}<br />{addr.line}, {addr.city}, {addr.state} - {addr.pin}</> : 'No delivery details saved.'}</p>
+        <p>Order IDs: {(orderIds || []).length ? orderIds.join(', ') : 'none'}</p>
+        <br /><button className="btn w" onClick={dl}>Download my data</button>
+        <br /><br /><button className="btn o w" onClick={wipe}>Withdraw consent and clear saved data</button>
+        {done ? <p style={{ color: 'var(--gr)', marginTop: 8 }} role="status">{done}</p> : null}
+      </div>
+      <div className="box">
+        <h3><Icon name="mail" size={18} />Data held by us for your orders</h3>
+        <p>To see, correct or permanently delete the order records we hold, send a request. We reply {GRIEVANCE.reply}.</p>
+        <br /><a className="btn g w" href={mail('Data access / correction request')}>Request access or correction</a>
+        <br /><br /><a className="btn o w" href={mail('Data deletion request')}>Request deletion</a>
+        <p style={{ marginTop: 10, fontSize: 13 }}>Contact person: {GRIEVANCE.name} · {LEGAL.phone} · {LEGAL.mail}</p>
+      </div>
+      <p style={{ fontSize: 13 }}><Link href="/privacy">Read the full Privacy Policy</Link></p>
+    </div>
+  );
 }
 
 function NotFoundView() {
@@ -2284,17 +2362,26 @@ const TITLES = {
   cart: 'Your Cart', address: 'Delivery Address', payment: 'Bill & Payment',
   'order-success': 'Order Placed', track: 'Track Order', orders: 'My Orders',
   contact: 'Contact Us', terms: 'Terms & Conditions', privacy: 'Privacy Policy',
+  refund: 'Replacement & Refund Policy', shipping: 'Shipping & Delivery Policy', 'my-data': 'My Data & Privacy Rights',
 };
-const MAX_PARTS = { cart: 1, address: 1, payment: 1, orders: 1, contact: 1, terms: 1, privacy: 1, track: 2, product: 2, 'order-success': 2 };
+const MAX_PARTS = { cart: 1, address: 1, payment: 1, orders: 1, contact: 1, terms: 1, privacy: 1, refund: 1, shipping: 1, 'my-data': 1, track: 2, product: 2, 'order-success': 2 };
 
 function parsePath(path) {
   return (path || '/').split('?')[0].split('/').filter(Boolean).map(dec);
 }
-function titleFor(path, findProduct, BN, TAGLINE) {
+function titleFor(path, findProduct, BN, loaded) {
+  // Same titles the server puts in <title> (see lib/seo.js), with the brand name from admin settings.
+  const brand = (t) => (BN && BN !== BRAND.name ? t.split(BRAND.name).join(BN) : t);
   const [a, b] = parsePath(path);
-  if (!a) return TAGLINE ? `${BN} - ${TAGLINE}` : BN;
-  const t = a === 'product' ? (findProduct(b) || {}).n : TITLES[a];
-  return (t || 'Page not found') + ' | ' + BN;
+  if (!a) return brand(PAGES.home.title);
+  if (a === 'product') {
+    const p = findProduct(b);
+    if (p) return productTitle(p.n, BN);
+    // catalog still loading: keep the product title the server already put in <title>
+    return loaded ? 'Page not found | ' + BN : null;
+  }
+  const pg = a !== 'home' ? PAGES[a] : null;
+  return pg ? brand(pg.title) : 'Page not found | ' + BN;
 }
 function renderRoute(path, findProduct) {
   const parts = parsePath(path);
@@ -2312,17 +2399,24 @@ function renderRoute(path, findProduct) {
     case 'contact': return <ContactView />;
     case 'terms': return <TermsView />;
     case 'privacy': return <PrivacyView />;
+    case 'refund': return <RefundView />;
+    case 'shipping': return <ShippingView />;
+    case 'my-data': return <MyDataView />;
     default: return <NotFoundView />;
   }
 }
 function Router() {
-  const { BN, TAGLINE, findProduct } = useCat();
+  const { BN, TAGLINE, findProduct, loaded } = useCat();
   const path = usePathname();
   useEffect(() => {
     if (path === null) return;
-    document.title = titleFor(path, findProduct, BN, TAGLINE);
     window.scrollTo(0, 0);
   }, [path, BN, TAGLINE]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (path === null) return;
+    const t = titleFor(path, findProduct, BN, loaded);
+    if (t) document.title = t;
+  }, [path, BN, findProduct, loaded]);
   if (path === null) return <div style={{ minHeight: '60vh' }} />;
   return renderRoute(path, findProduct);
 }

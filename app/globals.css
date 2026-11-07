@@ -55,7 +55,7 @@ svg{flex:none}
 .st{color:var(--gd);letter-spacing:1px;font-size:14px}
 .st i{color:var(--mu);font-style:normal;font-size:12px;letter-spacing:0}
 .pr{font-weight:600;color:var(--mr);font-size:18px}
-.pr s{color:#9a8a80;font-weight:400;font-size:13px;margin-left:5px}
+.pr s{color:#6f5a4e;font-weight:400;font-size:13px;margin-left:5px}
 .off{color:var(--gr);font-size:12px;font-weight:600}
 .tm{display:inline-flex;gap:4px;align-items:center;background:#fdecea;color:var(--rd);font-weight:600;font-size:12px;border-radius:8px;padding:2px 8px;margin-top:4px;align-self:flex-start}
 .btn{background:var(--mr);color:#fff;padding:12px 20px;border-radius:30px;font-weight:600;font-size:15px;border:2px solid var(--mr);display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;transition:.2s}
@@ -305,7 +305,7 @@ footer .fb img{width:52px;height:52px;border-radius:50%;background:#fff}
 .sg{display:inline-flex;gap:2px}.sg svg{fill:none;stroke:var(--gd);stroke-width:1.8}.sg svg.f{fill:var(--gd)}
 .pd-pc{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .pd-pr{font-family:var(--f-head);font-size:38px;font-weight:700;color:var(--mr);line-height:1.1}
-.pd-pr s{font-family:var(--f-body);font-size:16px;font-weight:400;color:#9a8a80;margin-left:8px}
+.pd-pr s{font-family:var(--f-body);font-size:16px;font-weight:400;color:#6f5a4e;margin-left:8px}
 .pd-sv{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px;font-size:13px;color:var(--mu)}
 .pd-sv b{background:var(--gr);color:#fff;border-radius:8px;padding:1px 9px;font-size:12px}
 .pd-lb{display:block;font-weight:600;color:var(--mr);margin:16px 0 8px}
@@ -357,7 +357,7 @@ footer .fb img{width:52px;height:52px;border-radius:50%;background:#fff}
 .sc>a{text-decoration:none;color:var(--tx);flex:1;display:block}
 .sc img{width:100%;aspect-ratio:1;display:block;background:var(--gd2)}
 .sc .sb{padding:8px 10px 6px}.sc .sb b{display:block;font-size:13.5px;color:var(--mr);line-height:1.25}.sc .sb small{color:var(--mu);font-size:12px}
-.sc .sp{font-weight:600;color:var(--mr);font-size:14px;margin-top:2px}.sc .sp s{color:#9a8a80;font-weight:400;font-size:12px;margin-left:5px}
+.sc .sp{font-weight:600;color:var(--mr);font-size:14px;margin-top:2px}.sc .sp s{color:#6f5a4e;font-weight:400;font-size:12px;margin-left:5px}
 .sctl{padding:0 10px 10px}.sctl .btn{width:100%;padding:6px 8px;font-size:13px}.sctl .cq{margin:0;width:100%}
 @media(min-width:700px){.sc{width:170px}}
 
@@ -371,7 +371,7 @@ footer .fb img{width:52px;height:52px;border-radius:50%;background:#fff}
 .cl>img{width:76px;height:76px;border-radius:14px;border:1px solid var(--ln);background:var(--gd2);flex:none}
 .cb{flex:1;min-width:0}.cb>b{display:block;color:var(--mr);font-size:15.5px;line-height:1.3}.cb small{color:var(--mu);font-size:13px}
 .cr{display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap}.cr .qty button{width:30px;height:30px}.cr .rm{margin:0}
-.ct{text-align:right;flex:none}.ct b{display:block;font-size:16px;color:var(--mr)}.ct s{color:#9a8a80;font-size:12.5px}
+.ct{text-align:right;flex:none}.ct b{display:block;font-size:16px;color:var(--mr)}.ct s{color:#6f5a4e;font-size:12.5px}
 .sv-b{display:flex;gap:8px;align-items:center;background:#eef8ee;border:1px dashed var(--gr);color:var(--gr);border-radius:12px;padding:9px 12px;font-size:13.5px;font-weight:600;margin-bottom:12px}
 .emp{text-align:center;padding:36px 16px}
 .emp>i{width:84px;height:84px;border-radius:50%;background:var(--gd2);color:var(--mr);display:grid;place-items:center;margin:0 auto 14px}
@@ -408,7 +408,7 @@ footer .fb img{width:52px;height:52px;border-radius:50%;background:#fff}
 .cbn img{display:block;width:100%;max-height:230px;object-fit:cover}
 .tag:before{background:var(--tc,#d9a21b)!important}
 .cpr{padding:0 10px 8px;text-align:center;font-weight:600;color:var(--mr);font-size:15px}
-.cpr s{color:#9a8a80;font-weight:400;font-size:12px;margin-left:5px}
+.cpr s{color:#6f5a4e;font-weight:400;font-size:12px;margin-left:5px}
 .cpr small{display:block;color:var(--mu);font-weight:400;font-size:11px}
 .card img,.pd-m img,.pd-t img,.sc img,.ci img,.cl img{object-fit:cover}
 .cats button img{object-fit:cover}

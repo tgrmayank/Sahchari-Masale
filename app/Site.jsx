@@ -3,11 +3,11 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import NextLink from 'next/link';
 import { useRouter as useNextRouter, usePathname as useNextPathname } from 'next/navigation';
 import logo from './logo.png';
-import procSourcing from './process-1-sourcing.png';
-import procSelection from './process-2-selection.png';
-import procProcessing from './process-3-processing.png';
-import procPackaging from './process-4-packaging.png';
-import procKitchen from './process-5-kitchen.png';
+import procSourcing from './process-1-sourcing.webp';
+import procSelection from './process-2-selection.webp';
+import procProcessing from './process-3-processing.webp';
+import procPackaging from './process-4-packaging.webp';
+import procKitchen from './process-5-kitchen.webp';
 import { supabase, configured } from '@/lib/supabase';
 import { CookieBanner, rememberOk, logConsent, GRIEVANCE, privacyDoc, termsDoc, refundDoc, shippingDoc } from '@/app/Compliance';
 import {
@@ -235,10 +235,10 @@ const PROCESS_CSS = `
 .fts-row.rev .fts-im{order:2}
 .fts-im{display:flex;align-items:center;justify-content:center}
 .fts-im img{width:100%;height:auto;display:block;border:0;border-radius:0;box-shadow:none;background:none}
-.fts-tx small{display:block;color:#9a6b1a;font-size:clamp(8px,1.6vw,12px);font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:clamp(8px,2vw,18px)}
+.fts-tx small{display:block;color:#855710;font-size:clamp(8px,1.6vw,12px);font-weight:700;letter-spacing:.2em;text-transform:uppercase;margin-bottom:clamp(8px,2vw,18px)}
 .fts-tx h3{font-family:'Playfair Display',Georgia,serif;font-weight:500;color:#1b4332;font-size:clamp(18px,4.2vw,34px);line-height:1.25;margin:0 0 clamp(8px,2vw,18px)}
 .fts-tx p{color:#6b6b6b;font-size:clamp(11px,2.1vw,15px);line-height:1.95;margin:0 0 clamp(10px,2vw,18px)}
-.fts-tx em{display:block;font-style:normal;color:#9a6b1a;font-size:clamp(7px,1.5vw,11px);font-weight:700;letter-spacing:.2em;text-transform:uppercase}
+.fts-tx em{display:block;font-style:normal;color:#855710;font-size:clamp(7px,1.5vw,11px);font-weight:700;letter-spacing:.2em;text-transform:uppercase}
 .fts-ft{padding-top:clamp(20px,6vw,60px)}
 .fts-ft h2{font-family:'Playfair Display',Georgia,serif;font-weight:500;color:#1b4332;font-size:clamp(24px,5.4vw,44px);line-height:1.25;margin:0 0 12px}
 .fts-ft p{color:#6b6b6b;font-size:clamp(12px,2.2vw,15px);line-height:1.8;max-width:900px;margin:0 auto}
@@ -255,7 +255,7 @@ function ProcessSection() {
       {PROCESS_STEPS.map((st, i) => (
         <div key={i} className={'fts-row' + (i % 2 ? ' rev' : '')}>
           <div className="fts-im">
-            <img src={st.img.src || st.img} alt={st.t} loading="lazy" />
+            <img src={st.img.src || st.img} alt={st.t} width={st.img.width || 800} height={st.img.height || 533} loading="lazy" decoding="async" />
           </div>
           <div className="fts-tx">
             <small>{st.tag}</small>
@@ -518,7 +518,7 @@ function MiniHeader() {
 /* ===== Hero ===== */
 const SLIDE_BG = 'radial-gradient(circle at 80% 20%,#8a2218,transparent 55%),linear-gradient(135deg,#5a1010,#2d0707)';
 
-function Slide({ s }) {
+function Slide({ s, first = false }) {
   const { setFilters } = useStore();
   const [bad, setBad] = useState(false);
   const open = () => {
@@ -529,7 +529,7 @@ function Slide({ s }) {
   };
   return (
     <div className="sl" style={{ '--g': SLIDE_BG, cursor: s.c ? 'pointer' : 'default' }} onClick={open}>
-      {s.img && !bad ? <img className="bgi" src={s.img} alt={s.t || ''} onError={() => setBad(true)} /> : null}
+      {s.img && !bad ? <img className="bgi" src={s.img} alt={s.t || ''} width="1200" height="440" {...(first ? { fetchPriority: 'high', loading: 'eager' } : { loading: 'lazy' })} decoding="async" onError={() => setBad(true)} /> : null}
     </div>
   );
 }
@@ -604,7 +604,7 @@ function Hero() {
           transition: snap ? 'none' : undefined,
         }}
       >
-        {slides.map((s) => <Slide key={s.id} s={s} />)}
+        {slides.map((s, i) => <Slide key={s.id} s={s} first={i === 0} />)}
         <Slide key="clone" s={slides[0]} />
       </div>
       <div className="bro">
@@ -840,14 +840,14 @@ const DW_CSS = `
 .dwl-lt{list-style:none;display:flex;margin:0;padding:0 2px;height:30px;position:relative;z-index:3}
 .dwl-lt li{position:relative;flex:1;min-width:0}
 .dwl-lt li::before{content:'';position:absolute;left:-1px;right:-1px;top:-8px;height:15px;border-bottom:2px solid #7a5217;border-radius:0 0 50% 50%}
-.dwl-lt i{position:absolute;left:50%;top:6px;width:9px;height:14px;margin-left:-4.5px;border-radius:50% 50% 50% 50%/38% 38% 62% 62%;background:radial-gradient(circle at 35% 28%,#fffc 0 14%,var(--c) 52%);animation:dwl-bulb 1.4s ease-in-out infinite;animation-delay:var(--d)}
+.dwl-lt i{position:absolute;left:50%;top:6px;width:9px;height:14px;margin-left:-4.5px;border-radius:50% 50% 50% 50%/38% 38% 62% 62%;background:radial-gradient(circle at 35% 28%,#fffc 0 14%,var(--c) 52%);box-shadow:0 0 6px 2px var(--c),0 0 14px 4px var(--c);will-change:opacity;animation:dwl-bulb 1.4s ease-in-out infinite;animation-delay:var(--d)}
 .dwl-lt i::before{content:'';position:absolute;left:50%;top:-4px;width:6px;height:5px;margin-left:-3px;background:#4a3210;border-radius:1px}
-.dwl-cf{position:absolute;top:-26px;width:84px;height:84px;z-index:2;pointer-events:none;background:radial-gradient(circle,#fff6d6 0 7%,#ffd54acc 18%,#ff9a0044 45%,transparent 70%);animation:dwl-flare 1.4s ease-in-out infinite}
+.dwl-cf{position:absolute;top:-26px;width:84px;height:84px;z-index:2;pointer-events:none;background:radial-gradient(circle,#fff6d6 0 7%,#ffd54acc 18%,#ff9a0044 45%,transparent 70%);will-change:transform,opacity;animation:dwl-flare 1.4s ease-in-out infinite}
 .dwl-cf.l{left:-26px}.dwl-cf.r{right:-26px;animation-delay:.7s}
 .dwl-sp{position:absolute;z-index:1;width:9px;height:9px;background:#ffe9a8;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);opacity:0;animation:dwl-tw 2.6s ease-in-out infinite}
 .dwl-in{position:relative;z-index:2;max-width:860px;margin:0 auto;padding:2px 10px 12px;display:flex;align-items:center;justify-content:center;gap:clamp(6px,3vw,26px)}
 .dwl-pr{flex:0 0 auto;width:clamp(48px,13vw,92px);perspective:320px}
-.dwl-d{display:block;width:100%;height:auto;overflow:visible;filter:drop-shadow(0 7px 5px #000a);transform-style:preserve-3d;animation:dwl-sway 5.5s ease-in-out infinite}
+.dwl-d{display:block;width:100%;height:auto;overflow:visible;filter:drop-shadow(0 7px 5px #000a);transform-style:preserve-3d;will-change:transform;animation:dwl-sway 5.5s ease-in-out infinite}
 .dwl-d.b{animation-delay:-2.7s}
 .dwl-halo{transform-box:fill-box;transform-origin:50% 50%;opacity:0;animation:dwl-lit 7s ease-in-out infinite}
 .dwl-warm{opacity:0;animation:dwl-lit 7s ease-in-out infinite}
@@ -861,11 +861,12 @@ const DW_CSS = `
 .dwl-tx p{animation:dwl-slR 8s ease-in-out .24s infinite;margin:3px auto 8px;max-width:460px;color:#f7e6b8;font-size:clamp(10px,2.7vw,14px);line-height:1.4}
 .dwl-tx button{border:0;cursor:pointer;font-family:inherit;font-weight:700;font-size:clamp(12px,3.2vw,14px);color:#4a0c0c;padding:6px 20px;border-radius:999px;background:linear-gradient(#ffe08a,#e9a912);box-shadow:0 2px 0 #a8730b;animation:dwl-pulse 2s ease-out infinite,dwl-slU 8s ease-in-out .36s infinite}
 .dwl-tx button:active{transform:translateY(2px);box-shadow:0 0 0 #a8730b}
+@media(prefers-reduced-motion:reduce){.dwl,.dwl *{animation:none!important}.dwl-burn{transform:scale(1)}.dwl-halo,.dwl-warm{opacity:1}}
 @keyframes dwl-drop{0%{opacity:0;transform:translateY(-100%)}100%{opacity:1;transform:none}}
 @keyframes dwl-slL{0%{opacity:0;transform:translateX(-80px)}9%,86%{opacity:1;transform:none}95%,100%{opacity:0;transform:translateX(80px)}}
 @keyframes dwl-slR{0%{opacity:0;transform:translateX(80px)}9%,86%{opacity:1;transform:none}95%,100%{opacity:0;transform:translateX(-80px)}}
 @keyframes dwl-slU{0%{opacity:0;transform:translateY(26px) scale(.7)}9%,86%{opacity:1;transform:none}95%,100%{opacity:0;transform:translateY(-14px) scale(.8)}}
-@keyframes dwl-bulb{0%,38%{opacity:1;filter:brightness(1.3) saturate(1.2);box-shadow:0 0 6px 2px var(--c),0 0 16px 5px var(--c)}50%,88%{opacity:.9;filter:brightness(.22) saturate(.7);box-shadow:0 0 0 0 transparent}100%{opacity:1;filter:brightness(1.3) saturate(1.2);box-shadow:0 0 6px 2px var(--c),0 0 16px 5px var(--c)}}
+@keyframes dwl-bulb{0%,38%{opacity:1}50%,88%{opacity:.25}100%{opacity:1}}
 @keyframes dwl-flare{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:1;transform:scale(1.15)}}
 @keyframes dwl-tw{0%,100%{opacity:0;transform:scale(.3) rotate(0)}50%{opacity:1;transform:scale(1.15) rotate(45deg)}}
 @keyframes dwl-sway{0%,100%{transform:rotateY(-16deg) rotateX(10deg)}50%{transform:rotateY(16deg) rotateX(6deg) translateY(-3px)}}
@@ -1030,7 +1031,7 @@ function ProductCard({ p }) {
     <div className="card" onClick={() => router.push(`/product/${p.id}`)}>
       {p.t ? <span className="tag" data-t={p.t} style={{ '--tc': p.tc }}>{p.t}</span> : null}
       <div className="im">
-        <img src={pimg(p, 0)} alt={p.n} loading="lazy" />
+        <img src={pimg(p, 0)} alt={p.n} width="400" height="400" loading="lazy" decoding="async" />
       </div>
       <h3>
         <Link href={`/product/${p.id}`} onClick={(e) => e.stopPropagation()}>{p.n}</Link>
@@ -1165,7 +1166,7 @@ function HomeView() {
               onClick={() => set({ c: x.name })}
               aria-label={x.name}
             >
-              <img src={cimg(x)} alt="" />
+              <img src={cimg(x)} alt="" width="46" height="46" decoding="async" />
               <span>{x.name}</span>
             </button>
           ))}
@@ -1210,7 +1211,7 @@ function SuggestCard({ p, quiet = false }) {
   return (
     <div className="sc">
       <Link href={`/product/${p.id}`} aria-label={`View ${p.n}`}>
-        <img src={pimg(p, 0)} alt={p.n} loading="lazy" />
+        <img src={pimg(p, 0)} alt={p.n} width="400" height="400" loading="lazy" decoding="async" />
         <div className="sb">
           <b>{p.n}</b>
           <small>{p.pk[0].l}</small>
@@ -1310,13 +1311,13 @@ function ProductDetail({ id }) {
         <div className="pd-g">
           <div className="pd-m">
             {p.t ? <span className="tag" data-t={p.t} style={{ '--tc': p.tc }}>{p.t}</span> : null}
-            <img id="mi" src={cur} alt={p.n} />
+            <img id="mi" src={cur} alt={p.n} width="800" height="800" decoding="async" />
           </div>
           {imgs.length > 1 ? (
             <div className="pd-ts">
               {imgs.map((u, i) => (
                 <button key={u + i} className={'pd-t' + (u === cur ? ' on' : '')} onClick={() => setGi(i)} aria-label={`View photo ${i + 1}`}>
-                  <img src={u} alt="" />
+                  <img src={u} alt="" width="120" height="120" loading="lazy" decoding="async" />
                 </button>
               ))}
             </div>
@@ -1501,7 +1502,7 @@ function CartView() {
             <h3><Icon name="bag" size={18} />Items in your cart</h3>
             {b.L.map((l, i) => (
               <div className="cl" key={l.id + '-' + l.k.l}>
-                <img src={pimg(l.p, 0)} alt={l.p.n} />
+                <img src={pimg(l.p, 0)} alt={l.p.n} width="76" height="76" decoding="async" />
                 <div className="cb">
                   <b>{l.p.n}</b>
                   <small>{l.k.l} · {rs(l.k.p)} each</small>
@@ -2006,7 +2007,7 @@ function OrderBox({ o, full = false }) {
         {o.items.map((i) => (
           <div className="oi" key={i.n + i.k}>
             <div className="ci">
-              <img src={i.img || pimg({ n: i.n }, 0)} alt={i.n} />
+              <img src={i.img || pimg({ n: i.n }, 0)} alt={i.n} width="68" height="68" loading="lazy" decoding="async" />
               <div>
                 <b>{i.n}</b><br />
                 <small>{i.k} × {i.q}</small>

@@ -1,14 +1,15 @@
 import { Router } from '../Site';
 import JsonLd from '@/lib/JsonLd';
 import { pageMetadata, abs } from '@/lib/seo';
-import { homeSchema, getProducts } from '@/lib/seo-server';
+import { homeSchema, getProducts, getHeroImage } from '@/lib/seo-server';
 
 export const metadata = pageMetadata('home');
 
 export default async function Page() {
-  const [schema, products] = await Promise.all([homeSchema(), getProducts()]);
+  const [schema, products, heroImg] = await Promise.all([homeSchema(), getProducts(), getHeroImage()]);
   return (
     <>
+      {heroImg ? <link rel="preload" as="image" href={heroImg} fetchPriority="high" /> : null}
       <JsonLd data={schema} />
       <Router />
       {/* Crawlable links for visitors / bots without JavaScript. Invisible when JS is on. */}

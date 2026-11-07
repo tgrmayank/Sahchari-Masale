@@ -1,5 +1,5 @@
 import { Baloo_2, Poppins } from 'next/font/google';
-import { SITE_URL, BRAND, PAGES, ROBOTS_INDEX, socialMeta } from '@/lib/seo';
+import { SITE_URL, BRAND, PAGES, ROBOTS_INDEX, ICONS, socialMeta } from '@/lib/seo';
 
 const baloo = Baloo_2({
   subsets: ['latin'],
@@ -42,6 +42,8 @@ export const metadata = {
   creator: BRAND.name,
   publisher: BRAND.name,
   category: 'Food & Grocery',
+  icons: ICONS,
+  formatDetection: { telephone: true, email: true, address: true },
   referrer: 'origin-when-cross-origin',
   robots: ROBOTS_INDEX,
   ...socialMeta({ title: home.title, description: home.description, path: '/' }),

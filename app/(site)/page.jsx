@@ -21,7 +21,11 @@ export default async function Page() {
             {products.slice(0, 100).map((p) => (
               <li key={p.id}><a href={abs(`/product/${p.id}`)}>{p.n}</a></li>
             ))}
-            <li><a href="/contact">Contact Us</a></li>
+            <li><a href="/contact">Sahchari Masale Contact</a></li>
+            <li><a href="/track">Track Your Order</a></li>
+            <li><a href="/orders">My Orders</a></li>
+            <li><a href="/cart">Cart</a></li>
+            <li><a href="/my-data">My Data &amp; Privacy Rights</a></li>
             <li><a href="/shipping">Shipping &amp; Delivery Policy</a></li>
             <li><a href="/refund">Replacement &amp; Refund Policy</a></li>
             <li><a href="/privacy">Privacy Policy</a></li>

@@ -821,13 +821,14 @@ function Toast() {
   );
 }
 
-/* ===== DiwaliBanner (home page top: offer + lights + 3D diya animation) ===== */
-const DIWALI = {
+/* ===== NewYearBanner (home page top: sale offer + lights) ===== */
+const NEWYEAR = {
   show: true,               // false karoge to banner hat jayega
-  until: '2026-11-15',      // is date ke baad banner apne aap band
-  label: 'Happy Diwali',
-  title: 'Diwali Special Offer',
-  text: 'Pure & fresh masale at special festive prices!',
+  until: '2027-01-15',      // is date ke baad banner apne aap band
+  label: 'Happy New Year 2027',
+  title: 'New Year Sale',
+  text: 'Up to 10% OFF on pure & fresh masale!',
+  code: 'NEW2027',
   cta: 'Shop Now',
 };
 const DW_COLORS = ['#ff5252', '#ffd740', '#69f0ae', '#40c4ff', '#ff80ab', '#ffab40'];
@@ -865,6 +866,7 @@ const DW_CSS = `
 .dwl-tx small{animation:dwl-slL 8s ease-in-out infinite;display:block;color:#ffd978;font-size:clamp(9px,2.4vw,12px);font-weight:600;letter-spacing:.26em;text-transform:uppercase}
 .dwl-tx h2{margin:1px 0 0;font-family:var(--f-head);font-weight:800;font-size:clamp(18px,5.3vw,38px);line-height:1.15;white-space:nowrap;padding:0 2px;background:linear-gradient(100deg,#ffd978 20%,#fff 45%,#ffb300 55%,#ffd978 80%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#ffd978;animation:dwl-shine 3.6s linear infinite,dwl-slL 8s ease-in-out .12s infinite}
 .dwl-tx p{animation:dwl-slR 8s ease-in-out .24s infinite;margin:3px auto 8px;max-width:460px;color:#f7e6b8;font-size:clamp(10px,2.7vw,14px);line-height:1.4}
+.dwl-tx .dwl-code{margin:0 auto 8px;color:#fff}.dwl-tx .dwl-code b{display:inline-block;margin-left:4px;padding:2px 10px;border:1.5px dashed #ffd978;border-radius:6px;color:#ffd978;letter-spacing:.14em}
 .dwl-tx button{border:0;cursor:pointer;font-family:inherit;font-weight:700;font-size:clamp(12px,3.2vw,14px);color:#4a0c0c;padding:6px 20px;border-radius:999px;background:linear-gradient(#ffe08a,#e9a912);box-shadow:0 2px 0 #a8730b;animation:dwl-pulse 2s ease-out infinite,dwl-slU 8s ease-in-out .36s infinite}
 .dwl-tx button:active{transform:translateY(2px);box-shadow:0 0 0 #a8730b}
 @media(prefers-reduced-motion:reduce){.dwl,.dwl *{animation:none!important}.dwl-burn{transform:scale(1)}.dwl-halo,.dwl-warm{opacity:1}}
@@ -884,49 +886,15 @@ const DW_CSS = `
 @keyframes dwl-pulse{0%{box-shadow:0 2px 0 #a8730b,0 0 0 0 #ffd978aa}70%,100%{box-shadow:0 2px 0 #a8730b,0 0 0 12px #ffd97800}}
 `;
 
-function DiwaliDiya({ cls }) {
-  return (
-    <div className="dwl-pr">
-      <svg className={'dwl-d ' + cls} viewBox="0 0 80 74" aria-hidden="true">
-<defs>
-<linearGradient id={`dcl-${cls}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#e8924a"/><stop offset=".38" stopColor="#c4601f"/><stop offset=".75" stopColor="#8a3a12"/><stop offset="1" stopColor="#4e1e08"/></linearGradient>
-<linearGradient id={`dvt-${cls}`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fff" stop-opacity=".22"/><stop offset=".45" stopColor="#fff" stop-opacity="0"/><stop offset="1" stopColor="#000" stop-opacity=".45"/></linearGradient>
-<linearGradient id={`drm-${cls}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#f7b36a"/><stop offset=".5" stopColor="#d97a30"/><stop offset="1" stopColor="#7a3010"/></linearGradient>
-<radialGradient id={`doil-${cls}`} cx=".5" cy=".4" r=".6"><stop offset="0" stopColor="#ffb347"/><stop offset=".5" stopColor="#8a3b0c"/><stop offset="1" stopColor="#2a0d03"/></radialGradient>
-<radialGradient id={`dwm-${cls}`} cx=".5" cy=".12" r=".8"><stop offset="0" stopColor="#ffc861" stop-opacity=".95"/><stop offset=".55" stopColor="#ff8a1f" stop-opacity=".35"/><stop offset="1" stopColor="#ff8a1f" stop-opacity="0"/></radialGradient>
-<radialGradient id={`dhl-${cls}`} cx=".5" cy=".5" r=".5"><stop offset="0" stopColor="#ffe08a" stop-opacity=".9"/><stop offset=".4" stopColor="#ffa726" stop-opacity=".4"/><stop offset="1" stopColor="#ff9800" stop-opacity="0"/></radialGradient>
-<linearGradient id={`dfl-${cls}`} x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#3d7bff" stop-opacity=".9"/><stop offset=".18" stopColor="#ff7a00"/><stop offset=".6" stopColor="#ffb300"/><stop offset="1" stopColor="#fff3a0"/></linearGradient>
-<linearGradient id={`dco-${cls}`} x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#fff"/><stop offset="1" stopColor="#fff7b0"/></linearGradient>
-</defs>
-<ellipse className="dwl-halo" cx="40" cy="26" rx="46" ry="40" fill={`url(#dhl-${cls})`}/>
-<path d="M7 40H73C73 57 59 68 40 68S7 57 7 40Z" fill={`url(#dcl-${cls})`}/>
-<path d="M7 40H73C73 57 59 68 40 68S7 57 7 40Z" fill={`url(#dvt-${cls})`}/>
-<path className="dwl-warm" d="M7 40H73C73 57 59 68 40 68S7 57 7 40Z" fill={`url(#dwm-${cls})`}/>
-<ellipse cx="40" cy="40" rx="33" ry="7" fill={`url(#drm-${cls})`}/>
-<ellipse cx="40" cy="41" rx="27" ry="4.8" fill={`url(#doil-${cls})`}/>
-<ellipse className="dwl-warm" cx="40" cy="41" rx="27" ry="4.8" fill="#ffb74d" opacity=".5"/>
-<path d="M17 52C24 62 56 62 63 52" stroke="#ffd978" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity=".75"/>
-<path d="M14 46C19 57 28 63 40 64" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity=".16"/>
-<rect x="39" y="35" width="2" height="6" rx="1" fill="#2b1608"/>
-<path className="dwl-smoke" d="M40 33C37 28 43 25 40 20S42 12 40 8" stroke="#e8e0d8" strokeWidth="1.4" strokeLinecap="round" fill="none"/>
-<g className="dwl-burn"><g className="dwl-fl">
-<path d="M40 4C46 12 51 19 51 26A11 11 0 0 1 29 26C29 19 34 12 40 4Z" fill={`url(#dfl-${cls})`}/>
-<path d="M40 15C43.5 20 45.5 24 45.5 27.5A5.5 5.5 0 0 1 34.5 27.5C34.5 24 36.5 20 40 15Z" fill={`url(#dco-${cls})`}/>
-</g></g>
-</svg>
-    </div>
-  );
-}
-
-function DiwaliBanner() {
-  if (!DIWALI.show) return null;
-  if (DIWALI.until && new Date() > new Date(DIWALI.until + 'T23:59:59')) return null;
+function NewYearBanner() {
+  if (!NEWYEAR.show) return null;
+  if (NEWYEAR.until && new Date() > new Date(NEWYEAR.until + 'T23:59:59')) return null;
   const goShop = () => {
     const el = document.querySelector('.shop');
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   return (
-    <section className="dwl" aria-label="Diwali offer">
+    <section className="dwl" aria-label="New Year sale offer">
       <style>{DW_CSS}</style>
       <span className="dwl-cf l" aria-hidden="true" />
       <span className="dwl-cf r" aria-hidden="true" />
@@ -939,14 +907,13 @@ function DiwaliBanner() {
         <span key={i} className="dwl-sp" aria-hidden="true" style={{ left: a[0] + '%', top: a[1] + '%', animationDelay: a[2] + 's' }} />
       ))}
       <div className="dwl-in">
-        <DiwaliDiya cls="a" />
         <div className="dwl-tx">
-          <small>{DIWALI.label}</small>
-          <h2>{DIWALI.title}</h2>
-          <p>{DIWALI.text}</p>
-          <button type="button" onClick={goShop}>{DIWALI.cta}</button>
+          <small>{NEWYEAR.label}</small>
+          <h2>{NEWYEAR.title}</h2>
+          <p>{NEWYEAR.text}</p>
+          <p className="dwl-code">Use code <b>{NEWYEAR.code}</b></p>
+          <button type="button" onClick={goShop}>{NEWYEAR.cta}</button>
         </div>
-        <DiwaliDiya cls="b" />
       </div>
     </section>
   );
@@ -966,7 +933,7 @@ function SiteShell({ children }) {
     <>
       {loadErr ? <div className="lderr">Store data could not be loaded: {loadErr}. Check the .env file and the SQL setup.</div> : null}
       <Marquee />
-      {pathname === '/' ? <DiwaliBanner /> : null}
+      {pathname === '/' ? <NewYearBanner /> : null}
       {pathname === null ? null : pathname === '/' ? <Hero /> : <MiniHeader />}
       <main id="app">{children}</main>
       <Footer />

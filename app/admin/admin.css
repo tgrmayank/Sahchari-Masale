@@ -220,3 +220,25 @@
 .a-bs small{color:var(--mu)}
 @media (max-width:760px){.a-page{padding:12px}.a-bar select,.a-bar .a-btn{flex:1 1 140px}.a-top{padding:10px 12px}}
 @media (prefers-reduced-motion:reduce){.adm *{animation:none!important;transition:none!important}}
+
+/* ===== PWA: install bar, install panel, notification gate ===== */
+.a-ibar{position:fixed;top:0;left:0;right:0;z-index:60;background:#2d0707f2;backdrop-filter:blur(8px);border-bottom:1px solid #ffffff22;padding-top:env(safe-area-inset-top)}
+.a-ibar .in{max-width:640px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:8px 14px}
+.a-ibar img{border-radius:9px;background:#fff;flex:none}
+.a-ibar .t{flex:1;min-width:0;color:#fff;line-height:1.2}
+.a-ibar .t b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a-ibar .t small{display:block;font-size:11.5px;color:#f1d9a6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a-ipanel{position:relative;max-width:640px;margin:0 auto;background:#fff;color:var(--tx);border-radius:14px;padding:14px 16px;margin:0 14px 10px;box-shadow:0 10px 30px #0005;font-size:13.5px}
+@media(min-width:680px){.a-ipanel{margin:0 auto 10px}}
+.a-ipanel .x{position:absolute;right:8px;top:4px;font-size:22px;line-height:1;color:var(--mu)}
+.a-ipanel ol,.a-ipanel ul{margin:8px 0 0;padding-left:20px}
+.a-ipanel ul{list-style:none;padding:0}
+.a-ipanel li{margin:6px 0}
+.a-ipanel li.ok span{color:var(--gr);font-weight:600}
+.a-ipanel li.bad span{color:var(--rd);font-weight:600}
+.a-ipanel li small{display:block;color:var(--mu);margin-top:2px}
+.a-gate .bell{width:64px;height:64px;border-radius:50%;margin:0 auto 12px;display:grid;place-items:center;background:#fbf0d4;color:var(--mr)}
+.a-side-f button:disabled{opacity:.6}
+
+/* Installed admin app: no links to the public website */
+.adm.is-app .a-side-f a[href="/"],.adm.is-app .a-lbox a[href="/"]{display:none}

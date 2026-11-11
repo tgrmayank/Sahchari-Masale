@@ -3,6 +3,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase, configured } from '@/lib/supabase';
 import logo from '../logo.png';
 import { UIProvider, Ico, Loading } from './ui';
+import PushGate from './PushGate';
+import { InstallButton } from './PwaInstall';
+import { savedToken, registerPush, unregisterPush, isStandalone } from '@/lib/push';
 import Dashboard from './sections/Dashboard';
 import Orders from './sections/Orders';
 import Products from './sections/Products';
@@ -67,6 +70,7 @@ function Shell({ email, onLogout }) {
             : <button key={n[0]} className={n[0] === sec ? 'on' : ''} onClick={() => go(n[0])}><Ico n={n[2]} />{n[1]}</button>)}
         </nav>
         <div className="a-side-f">
+          <InstallButton />
           <a href="/" target="_blank" rel="noopener"><Ico n="globe" />View website</a>
           <button onClick={onLogout}><Ico n="out" />Logout</button>
         </div>
@@ -87,8 +91,10 @@ function Shell({ email, onLogout }) {
 export default function AdminPage() {
   const [state, setState] = useState('load'); // load | ok | denied | nokeys
   const [email, setEmail] = useState('');
+  const [push, setPush] = useState('check'); // check | need | ready
 
   const logout = useCallback(async () => {
+    try { await unregisterPush(); } catch {}
     await supabase.auth.signOut();
     window.location.replace('/admin/login');
   }, []);
@@ -111,6 +117,27 @@ export default function AdminPage() {
     return () => { off = true; sub.subscription.unsubscribe(); };
   }, []);
 
+  // Once the admin is confirmed: this device must allow notifications before the panel opens.
+  useEffect(() => {
+    if (state !== 'ok') return;
+    const granted = typeof Notification !== 'undefined' && Notification.permission === 'granted';
+    let skipped = false;
+    try { skipped = sessionStorage.getItem('sm_push_skip') === '1'; } catch {}
+    if (granted && savedToken()) {
+      setPush('ready');
+      registerPush().catch(() => {}); // silent refresh of the saved device token
+    } else if (skipped && !isStandalone()) {
+      setPush('ready');
+    } else {
+      setPush('need');
+    }
+  }, [state]);
+
+  const skipPush = () => {
+    try { sessionStorage.setItem('sm_push_skip', '1'); } catch {}
+    setPush('ready');
+  };
+
   if (state === 'load') return <div className="a-load"><span /></div>;
   if (state === 'nokeys') return (
     <div className="a-login"><div className="a-lbox"><h1>Setup needed</h1>
@@ -121,5 +148,7 @@ export default function AdminPage() {
       <p className="s">{email} is not an admin. Add this email in the SQL file (admins table) and run it again.</p>
       <button className="a-btn w" onClick={logout}>Logout</button></div></div>
   );
+  if (push === 'check') return <div className="a-load"><span /></div>;
+  if (push === 'need') return <PushGate onDone={() => setPush('ready')} onSkip={skipPush} />;
   return <UIProvider><Shell email={email} onLogout={logout} /></UIProvider>;
 }

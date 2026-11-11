@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { supabase, configured } from '@/lib/supabase';
 import logo from '../../logo.png';
+import { InstallBar } from '../PwaInstall';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -32,6 +33,7 @@ export default function AdminLogin() {
 
   return (
     <div className="a-login">
+      <InstallBar />
       <form className="a-lbox" onSubmit={submit}>
         <img className="lg" src={logo.src || logo} alt="" />
         <h1>Admin Login</h1>

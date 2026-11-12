@@ -14,6 +14,7 @@ import Banners from './sections/Banners';
 import Coupons from './sections/Coupons';
 import Reviews from './sections/Reviews';
 import Account from './sections/Account';
+import Payments from './sections/Payments';
 import { Delivery, StoreInfo, HomeContent, Policies } from './sections/Settings';
 
 const NAV = [
@@ -26,6 +27,7 @@ const NAV = [
   ['reviews', 'Reviews', 'star', Reviews],
   ['sep', 'Store settings'],
   ['delivery', 'Delivery Charges', 'truck', Delivery],
+  ['payments', 'Payments', 'card', Payments],
   ['store', 'Store & Contact', 'shop', StoreInfo],
   ['content', 'Homepage Text', 'text', HomeContent],
   ['policies', 'Terms & Privacy', 'file', Policies],

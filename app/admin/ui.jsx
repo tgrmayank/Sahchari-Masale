@@ -26,6 +26,7 @@ const PATHS = {
   trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',
   copy: 'M8 8h12v12H8zM4 16V4h12',
   plus: 'M12 5v14M5 12h14',
+  card: 'M3 6h18v12H3zM3 10h18M7 15h4',
 };
 export function Ico({ n, size = 18 }) {
   return (

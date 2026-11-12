@@ -3,22 +3,43 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRows, money, dt, STATUS, STATUS_CLS } from '@/lib/admin';
 import { Loading, Err, Empty, Modal, Field, useUI } from '../ui';
+import { methodLabel } from '@/app/PayGateway';
+
+/* payment helpers (old orders have no payment info = Cash on Delivery) */
+const pmOf = (o) => String(o.payment_method || 'cod').toLowerCase();
+const psOf = (o) => o.payment_status || 'pending';
+const PS_LABEL = { pending: 'Pending', verifying: 'Verifying', paid: 'Paid / Received', failed: 'Not received' };
+const payBadge = (o) => {
+  const m = pmOf(o), s = psOf(o);
+  if (m === 'online') return s === 'paid' ? ['g', 'Online · Paid'] : s === 'failed' ? ['r', 'Online · Not received'] : ['o', 'Online · Verify'];
+  if (m === 'cod_advance') return s === 'paid' ? ['g', 'COD · Advance paid'] : s === 'failed' ? ['r', 'COD · Advance not received'] : ['o', 'COD · Verify advance'];
+  return s === 'paid' ? ['g', 'COD · Collected'] : ['b', 'COD'];
+};
+const dueOf = (o) => (o.due_amount ?? o.total);
 
 function Detail({ o, onClose, onSaved, onDeleted }) {
   const { toast, confirm } = useUI();
   const [st, setSt] = useState(o.status);
   const [note, setNote] = useState(o.admin_note || '');
+  const [pst, setPst] = useState(psOf(o));
   const [busy, setBusy] = useState(false);
+  const hasPay = 'payment_status' in o; // false until 1-payments.sql is run
+  const m = pmOf(o);
   const a = o.address || {};
   const phone = '91' + String(o.customer_phone || '').replace(/\D/g, '').slice(-10);
 
   const save = async () => {
     setBusy(true);
-    const { error } = await supabase.from('orders').update({ status: st, admin_note: note }).eq('id', o.id);
+    const patch = { status: st, admin_note: note };
+    if (hasPay && pst !== psOf(o)) {
+      patch.payment_status = pst;
+      patch.payment_verified_at = pst === 'paid' ? new Date().toISOString() : null;
+    }
+    const { error } = await supabase.from('orders').update(patch).eq('id', o.id);
     setBusy(false);
     if (error) return toast(error.message, 'err');
     toast('Order updated');
-    onSaved({ ...o, status: st, admin_note: note });
+    onSaved({ ...o, ...patch });
   };
   const del = async () => {
     if (!(await confirm('Delete this order permanently?'))) return;
@@ -41,7 +62,11 @@ function Detail({ o, onClose, onSaved, onDeleted }) {
         <dt>Placed</dt><dd>{dt(o.created_at)}</dd>
         <dt>Customer</dt><dd>{a.name} · <a href={'tel:' + o.customer_phone}>{o.customer_phone}</a></dd>
         <dt>Address</dt><dd>{a.line}{a.lm ? ', ' + a.lm : ''}, {a.city}, {a.state} - {a.pin}</dd>
-        <dt>Payment</dt><dd>{o.payment_method || 'COD'}</dd>
+        <dt>Payment</dt><dd>{methodLabel(m)} <span className={'a-badge ' + payBadge(o)[0]}>{payBadge(o)[1]}</span></dd>
+        {m !== 'cod' ? <><dt>Paid online</dt><dd>{money(o.paid_amount)}{o.payment_app ? ' via ' + o.payment_app : ''}</dd></> : null}
+        {m !== 'cod' && o.payment_utr ? <><dt>UTR / Txn ID</dt><dd>{o.payment_utr}</dd></> : null}
+        {m !== 'cod' && o.payment_upi ? <><dt>Paid to UPI</dt><dd>{o.payment_upi}</dd></> : null}
+        <dt>Collect on delivery</dt><dd><b>{money(m === 'online' ? 0 : dueOf(o))}</b></dd>
       </dl>
       <div className="a-lines">
         {(o.items || []).map((i, n) => (
@@ -56,9 +81,16 @@ function Detail({ o, onClose, onSaved, onDeleted }) {
       {o.discount > 0 ? <div className="a-sum"><span>Discount</span><span>− {money(o.discount)}</span></div> : null}
       {o.coupon_discount > 0 ? <div className="a-sum"><span>Coupon {o.coupon_code}</span><span>− {money(o.coupon_discount)}</span></div> : null}
       <div className="a-sum"><span>Delivery</span><span>{o.shipping > 0 ? money(o.shipping) : 'FREE'}</span></div>
-      <div className="a-sum t"><span>Total (COD)</span><span>{money(o.total)}</span></div>
+      <div className="a-sum t"><span>Order total</span><span>{money(o.total)}</span></div>
 
       <div style={{ marginTop: 16 }}>
+        {hasPay ? (
+          <Field label="Payment status" hint={m === 'cod' ? '(set to Paid after you collect the cash)' : '(check your UPI app, then set to Paid)'}>
+            <select value={pst} onChange={(e) => setPst(e.target.value)}>
+              {Object.entries(PS_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            </select>
+          </Field>
+        ) : null}
         <Field label="Order status">
           <select value={st} onChange={(e) => setSt(Number(e.target.value))}>
             {STATUS.map((s, i) => <option key={s} value={i}>{s}</option>)}
@@ -100,13 +132,14 @@ export default function Orders() {
 
   const exportCsv = () => {
     const esc = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
-    const head = ['Order ID', 'Date', 'Status', 'Customer', 'Phone', 'Address', 'Items', 'Subtotal (MRP)', 'Discount', 'Coupon', 'Coupon discount', 'Delivery', 'Total', 'Note'];
+    const head = ['Order ID', 'Date', 'Status', 'Customer', 'Phone', 'Address', 'Items', 'Subtotal (MRP)', 'Discount', 'Coupon', 'Coupon discount', 'Delivery', 'Total', 'Payment method', 'Payment status', 'Paid online', 'Pay on delivery', 'Payment app', 'UTR', 'Note'];
     const body = list.map((o) => {
       const a = o.address || {};
       return [o.id, new Date(o.created_at).toLocaleString('en-IN'), STATUS[o.status], o.customer_name, o.customer_phone,
         [a.line, a.lm, a.city, a.state, a.pin].filter(Boolean).join(', '),
         (o.items || []).map((i) => `${i.n} (${i.k}) x${i.q}`).join('; '),
-        o.subtotal, o.discount, o.coupon_code, o.coupon_discount, o.shipping, o.total, o.admin_note].map(esc).join(',');
+        o.subtotal, o.discount, o.coupon_code, o.coupon_discount, o.shipping, o.total,
+        methodLabel(pmOf(o)), PS_LABEL[psOf(o)], o.paid_amount || 0, pmOf(o) === 'online' ? 0 : dueOf(o), o.payment_app, o.payment_utr, o.admin_note].map(esc).join(',');
     });
     const blob = new Blob(['\ufeff' + [head.map(esc).join(','), ...body].join('\n')], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');
@@ -137,7 +170,7 @@ export default function Orders() {
       {list.length ? list.map((o) => (
         <div className="a-item" key={o.id}>
           <div className="a-grow" style={{ cursor: 'pointer' }} onClick={() => setOpen(o)}>
-            <h4>{o.id} <span className={'a-badge ' + STATUS_CLS[o.status]}>{STATUS[o.status]}</span></h4>
+            <h4>{o.id} <span className={'a-badge ' + STATUS_CLS[o.status]}>{STATUS[o.status]}</span> <span className={'a-badge ' + payBadge(o)[0]}>{payBadge(o)[1]}</span></h4>
             <small>{o.customer_name} · {o.customer_phone} · {dt(o.created_at)}</small>
             <small>{(o.items || []).map((i) => `${i.n} (${i.k}) ×${i.q}`).join(', ')}</small>
           </div>

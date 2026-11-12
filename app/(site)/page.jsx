@@ -16,7 +16,7 @@ export default async function Page() {
       <noscript>
         <nav aria-label="Sahchari Masale">
           <h1>Sahchari Masale - Pure Indian Spices</h1>
-          <p>Buy authentic Indian spices (masale) online from Sahchari Masale, Mathura. FSSAI licensed. Cash on Delivery across India.</p>
+          <p>Buy authentic Indian spices (masale) online from Sahchari Masale, Mathura. FSSAI licensed. Cash on Delivery and online UPI payment across India.</p>
           <ul>
             {products.slice(0, 100).map((p) => (
               <li key={p.id}><a href={abs(`/product/${p.id}`)}>{p.n}</a></li>

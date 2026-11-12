@@ -27,13 +27,18 @@ export async function POST(req) {
   if (!isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   let token = '';
-  try { token = String((await req.json()).token || ''); } catch {}
+  let platform = 'web';
+  try {
+    const j = await req.json();
+    token = String(j.token || '');
+    platform = j.platform === 'android' ? 'android' : 'web';
+  } catch {}
   if (!/^[A-Za-z0-9_\-:.]{10,300}$/.test(token)) return NextResponse.json({ error: 'Bad token' }, { status: 400 });
 
   const result = await pushyPush([token], {
     title: 'Notifications are ON',
     message: 'You will get an alert here for every new order.',
     url: `${siteUrl()}/admin#orders`,
-  });
+  }, platform);
   return NextResponse.json({ ok: result.ok, error: result.error }, { status: result.ok ? 200 : 502 });
 }

@@ -14,6 +14,10 @@ import {
   IC, ST, SD, SI, rs, pimg, cimg, packInfo, chk, computeBill, fdate, buildCatalog, mapCoupon,
 } from './data';
 import { PAGES, BRAND, productTitle } from '@/lib/seo';
+import './pay.css';
+import {
+  Gateway, PayStrip, PayRow, PIcon, derivePay, advanceFor, payShort, payLine, paySub, payTitle, methodLabel, useOrderPays,
+} from './PayGateway';
 
 const DEFAULT_LOGO = logo.src || logo;
 
@@ -337,6 +341,7 @@ function StoreProvider({ children }) {
   const [raw, setRaw] = useState(null); // null = still loading
   const [loadErr, setLoadErr] = useState('');
   const [extra, setExtra] = useState({}); // hidden coupons found by code
+  const [payRow, setPayRow] = useState(undefined); // payment settings: undefined = loading, null = not set up (COD only)
 
   /* session only */
   const [filters, setFilters] = useState({ q: '', c: 'All', s: '', t: '' });
@@ -408,10 +413,20 @@ function StoreProvider({ children }) {
     return () => { off = true; };
   }, []);
 
+  /* payment settings (Admin -> Payments). If the table is missing the shop keeps working as Cash on Delivery only. */
+  useEffect(() => {
+    if (!configured) { setPayRow(null); return; }
+    let off = false;
+    supabase.from('payment_settings').select('*').eq('id', 1).maybeSingle().then(({ data, error }) => {
+      if (!off) setPayRow(error ? null : data || null);
+    });
+    return () => { off = true; };
+  }, []);
+
   const cat = useMemo(() => {
     const c = buildCatalog(raw || EMPTY_RAW, extra);
-    return { ...c, LOGO: c.S.logo_url || DEFAULT_LOGO, loaded: raw !== null, loadErr };
-  }, [raw, extra, loadErr]);
+    return { ...c, LOGO: c.S.logo_url || DEFAULT_LOGO, PAY: derivePay(payRow, c.BN), payReady: payRow !== undefined, loaded: raw !== null, loadErr };
+  }, [raw, extra, loadErr, payRow]);
 
   // hidden coupons are not listed publicly - look them up by code
   const ensureCoupon = useCallback(async (code) => {
@@ -465,13 +480,21 @@ function StoreProvider({ children }) {
   }, []);
 
   /* ---------- orders (saved in Supabase; price is re-checked on the server) ---------- */
-  const placeOrder = async () => {
+  const placeOrder = async ({ method = 'cod', app = null, utr = null } = {}) => {
     const items = cart.map((c) => ({ pid: c.id, k: c.k, q: c.q }));
-    const { data, error } = await supabase.rpc('place_order', {
+    let res = await supabase.rpc('place_order_pay', {
       p_items: items,
       p_addr: addr,
       p_coupon: coupon || null,
+      p_method: method,
+      p_app: app,
+      p_utr: utr || null,
     });
+    // payments SQL not run yet: keep working as plain Cash on Delivery
+    if (res.error && method === 'cod' && (res.error.code === 'PGRST202' || /could not find the function/i.test(res.error.message || ''))) {
+      res = await supabase.rpc('place_order', { p_items: items, p_addr: addr, p_coupon: coupon || null });
+    }
+    const { data, error } = res;
     if (error) throw new Error(error.message);
     setOrderIds((o) => [data.id, ...o.filter((x) => x !== data.id)]);
     const d4 = String((addr && addr.phone) || '').replace(/\D/g, '').slice(-4);
@@ -755,7 +778,7 @@ function LegalInfo() {
 }
 
 function Footer() {
-  const { BN, TAGLINE, PH, WA, MAIL, IG, IGH, ADDR, LOGO } = useCat();
+  const { BN, TAGLINE, PH, WA, MAIL, IG, IGH, ADDR, LOGO, PAY } = useCat();
   return (
     <footer id="ft">
       <div className="in">
@@ -796,10 +819,11 @@ function Footer() {
         <div>
           <h3>Connect With Us</h3>
           <Social />
-          <p style={{ marginTop: 14 }}><Icon name="cash" size={16} />Cash on Delivery available</p>
+          <p style={{ marginTop: 14 }}><Icon name="cash" size={16} />{payLine(PAY)}</p>
           <p><Icon name="shield" size={16} />Your data is never sold or shared</p>
         </div>
       </div>
+      <PayStrip pay={PAY} />
       <LegalInfo />
       <div className="cp">
         <span suppressHydrationWarning>© {new Date().getFullYear()} {BN}. All rights reserved.</span>
@@ -1210,7 +1234,7 @@ function SuggestCard({ p, quiet = false }) {
 
 /* ===== ProductDetail ===== */
 function ProductDetail({ id }) {
-  const { S, BN, WA, ADDR, FREE_SHIP, P } = useCat();
+  const { S, BN, WA, ADDR, FREE_SHIP, P, PAY } = useCat();
   const p = P.find((x) => x.id == id);
   const router = useRouter();
   const { addLine, showToast, setFilters } = useStore();
@@ -1252,7 +1276,7 @@ function ProductDetail({ id }) {
   const wa = 'https://wa.me/' + WA + '?text=' + encodeURIComponent('Hi, I would like to know more about ' + p.n);
   const trust = [
     ['truck', 'Free delivery', `On orders above ${rs(FREE_SHIP)}`],
-    ['cash', 'Cash on Delivery', 'Pay when it arrives'],
+    ['cash', payShort(PAY), paySub(PAY)],
     ['shield', 'Quality checked', 'Packed with care'],
     ['leaf', 'Pure & natural', 'Carefully selected'],
   ];
@@ -1397,7 +1421,7 @@ function ProductDetail({ id }) {
             <dt>Pack sizes</dt><dd>{p.pk.map((x) => x.l).join(', ')}</dd>
             <dt>Brand</dt><dd>{BN}</dd>
             {ADDR ? <><dt>Made in</dt><dd>{ADDR}</dd></> : null}
-            <dt>Payment</dt><dd>Cash on Delivery</dd>
+            <dt>Payment</dt><dd>{payShort(PAY)}</dd>
             {S.delivery_days ? <><dt>Delivery</dt><dd>{S.delivery_days} (estimated)</dd></> : null}
           </dl>
         </div>
@@ -1743,13 +1767,17 @@ function SugBox({ pay }) {
 }
 
 function PaymentView() {
-  const { findCoupon, env } = useCat();
+  const { findCoupon, env, PAY, payReady, BN, TAGLINE, LOGO, ADDR, PH, MAIL } = useCat();
   const { ready, cart, addr, coupon, setCoupon, placeOrder, ensureCoupon } = useStore();
   const router = useRouter();
   const placing = useRef(false);
+  const keep = useRef(false); // keeps this page (and the secure checkout) alive while an online order is being placed
+  const orderRef = useRef('');
   const [busy, setBusy] = useState(false);
   const [perr, setPerr] = useState('');
   const [cpChecked, setCpChecked] = useState(false);
+  const [method, setMethod] = useState(''); // '' = default | 'cod' | 'online'
+  const [gw, setGw] = useState(null); // { amount, balance, method } while the secure checkout is open
 
   const b = computeBill(cart, coupon, env);
 
@@ -1769,18 +1797,23 @@ function PaymentView() {
 
   // guard: need items + address (but not while we are placing the order)
   useEffect(() => {
-    if (ready && !placing.current && (!cart.length || !addr.name)) router.replace('/cart');
+    if (ready && !placing.current && !keep.current && (!cart.length || !addr.name)) router.replace('/cart');
   }, [ready, cart.length, addr.name, router]);
 
-  if (!ready || !cart.length || !addr.name) return <div className="wrap pg" style={{ minHeight: '60vh' }} />;
+  if (!ready || !payReady) return <div className="wrap pg" style={{ minHeight: '60vh' }} />;
+  if (!keep.current && (!cart.length || !addr.name)) return <div className="wrap pg" style={{ minHeight: '60vh' }} />;
 
-  const place = async () => {
+  // chosen method (falls back to the first one that is available)
+  const eff = (method === 'cod' && PAY.cod) || (method === 'online' && PAY.online) ? method : PAY.cod ? 'cod' : PAY.online ? 'online' : '';
+  const adv = eff === 'cod' ? advanceFor(PAY, b.total) : 0;
+
+  const placeCod = async () => {
     if (busy) return;
     setBusy(true);
     setPerr('');
     placing.current = true;
     try {
-      const id = await placeOrder();
+      const id = await placeOrder({ method: 'cod' });
       router.push('/order-success/' + id);
     } catch (e) {
       placing.current = false;
@@ -1789,11 +1822,32 @@ function PaymentView() {
     }
   };
 
+  const onPlace = () => {
+    if (busy || !eff) return;
+    setPerr('');
+    if (eff === 'online') setGw({ amount: b.total, balance: 0, method: 'online' });
+    else if (adv > 0) setGw({ amount: adv, balance: b.total - adv, method: 'cod' });
+    else placeCod();
+  };
+
+  // called by the secure checkout when the customer taps "I have paid"
+  const confirmOnline = async ({ app, utr }) => {
+    keep.current = true;
+    placing.current = true;
+    try {
+      orderRef.current = await placeOrder({ method: gw.method, app, utr });
+    } catch (e) {
+      keep.current = false;
+      placing.current = false;
+      throw e;
+    }
+  };
+
   return (
     <div className="wrap pg" style={{ maxWidth: 660 }}>
       <Steps n={2} />
       <Link href="/address" className="back"><Icon name="back" size={18} />Back to address</Link>
-      <PageHead icon="bag" title="Bill & Payment" sub="Review your bill and place the order" />
+      <PageHead icon="bag" title="Bill & Payment" sub="Review your bill and choose how to pay" />
 
       <CouponBox b={b} />
       <SugBox pay={b.pay} />
@@ -1826,17 +1880,60 @@ function PaymentView() {
 
       <div className="box">
         <h3><Icon name="cash" size={18} />Payment Method</h3>
-        <label className="cod">
-          <input type="radio" defaultChecked readOnly />
-          <Icon name="cash" size={22} />Cash on Delivery
-          <span style={{ marginLeft: 'auto', fontWeight: 400, fontSize: 12 }}>Pay when it arrives</span>
-        </label>
+        {!PAY.any ? (
+          <div className="pm-none">Orders are temporarily unavailable. Please contact us to place your order.</div>
+        ) : (
+          <div className="pm-list">
+            {PAY.cod ? (
+              <label className={'pm' + (eff === 'cod' ? ' on' : '')}>
+                <input type="radio" name="pm" checked={eff === 'cod'} onChange={() => setMethod('cod')} />
+                <span className="pi"><Icon name="cash" size={22} /></span>
+                <span>
+                  <b>Cash on Delivery</b>
+                  <small>{PAY.advOn ? 'Pay a small advance now, the rest on delivery' : 'Pay when it arrives'}</small>
+                </span>
+              </label>
+            ) : null}
+            {PAY.online ? (
+              <label className={'pm' + (eff === 'online' ? ' on' : '')}>
+                <input type="radio" name="pm" checked={eff === 'online'} onChange={() => setMethod('online')} />
+                <span className="pi"><PIcon n="pay" size={22} /></span>
+                <span>
+                  <b>Online Payment (UPI)</b>
+                  <small>Pay now with any UPI app</small>
+                  <span className="pm-apps">
+                    {PAY.apps.map((a) => <img key={a.n} src={a.src} alt={a.n} title={a.n} width="26" height="26" loading="lazy" />)}
+                  </span>
+                </span>
+              </label>
+            ) : null}
+          </div>
+        )}
+        {eff === 'cod' && adv > 0 ? (
+          <div className="pm-adv">
+            <div><span>Order total</span><span>{rs(b.total)}</span></div>
+            <div><span>Advance to pay now (online)</span><b>{rs(adv)}</b></div>
+            <div className="t"><span>Pay in cash on delivery</span><span>{rs(b.total - adv)}</span></div>
+            <p>An advance is needed to confirm Cash on Delivery orders. You will pay it with a UPI app on the next step.</p>
+          </div>
+        ) : null}
       </div>
 
       {perr ? <p style={{ color: 'var(--rd)', fontSize: 14, margin: '0 0 10px' }} role="alert">{perr}</p> : null}
-      <button className="btn w" onClick={place} disabled={busy}>
-        <Icon name="check" size={18} />{busy ? 'Placing order…' : `Place Order · ${rs(b.total)}`}
+      <button className="btn w" onClick={onPlace} disabled={busy || !eff}>
+        <Icon name="check" size={18} />
+        {busy ? 'Placing order…' : eff === 'online' ? `Pay ${rs(b.total)} securely` : adv > 0 ? `Pay ${rs(adv)} advance & place order` : `Place Order · ${rs(b.total)}`}
       </button>
+
+      {gw ? (
+        <Gateway
+          pay={PAY} brand={BN} tagline={TAGLINE} logo={LOGO} address={ADDR} phone={PH} email={MAIL}
+          amount={gw.amount} balance={gw.balance}
+          onClose={() => setGw(null)}
+          onConfirm={confirmOnline}
+          onSuccess={() => router.push('/order-success/' + orderRef.current)}
+        />
+      ) : null}
     </div>
   );
 }
@@ -1845,6 +1942,10 @@ function PaymentView() {
 function DoneView({ id }) {
   const { S, BN } = useCat();
   const router = useRouter();
+  let oid = id;
+  try { oid = decodeURIComponent(id); } catch {}
+  const pays = useOrderPays(oid ? [String(oid).toUpperCase()] : []);
+  const pm = pays[String(oid || '').toUpperCase()];
   return (
     <div className="wrap pg ok" style={{ maxWidth: 560 }}>
       <svg className="big" viewBox="0 0 120 120" fill="none" stroke="#2e7d32" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round">
@@ -1855,9 +1956,20 @@ function DoneView({ id }) {
       <p>Thank you for shopping with {BN}.</p>
       <div className="oid">{id}</div>
       <p style={{ color: 'var(--mu)' }}>
-        Keep this Order ID to track your order.<br />
-        Payment: Cash on Delivery{S.delivery_days ? ` · Estimated delivery: ${S.delivery_days}` : ''}
+        Keep this Order ID to track your order.
+        {S.delivery_days ? <><br />Estimated delivery: {S.delivery_days}</> : null}
       </p>
+      {pm ? (
+        <div className="box" style={{ textAlign: 'left', marginTop: 14 }}>
+          <h3><Icon name="cash" size={18} />Payment</h3>
+          <PayRow p={pm} total={0} />
+          {pm.method !== 'cod' && pm.status === 'verifying' ? (
+            <p style={{ fontSize: 13, color: 'var(--mu)', marginTop: 8 }}>
+              We will verify your payment and then confirm your order. If you need help, contact us with your Order ID.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
       <br />
       <button className="btn w" onClick={() => router.push('/track/' + encodeURIComponent(id))}>
         <Icon name="truck" size={18} />Track Order
@@ -1959,7 +2071,7 @@ function RateItem({ o, item }) {
   );
 }
 
-function OrderBox({ o, full = false }) {
+function OrderBox({ o, full = false, pay }) {
   return (
     <div className="box">
       <div className="oh">
@@ -1993,8 +2105,9 @@ function OrderBox({ o, full = false }) {
           <span>Coupon {o.cc}</span><b>− {rs(o.cd)}</b>
         </div>
       ) : null}
+      <PayRow p={pay} total={o.total} />
       <div className="ofoot">
-        <div className="otot">Total · Cash on Delivery<b>{rs(o.total)}</b></div>
+        <div className="otot">Total · {payTitle(pay)}<b>{rs(o.total)}</b></div>
         {full ? null : (
           <Link className="btn sm" href={'/track/' + o.id}>
             <Icon name="truck" size={16} />Track order
@@ -2012,6 +2125,7 @@ function TrackView({ id = '' }) {
   const [o, setO] = useState(null);
   const [state, setState] = useState('idle'); // idle | need | load | done
   const [l4, setL4] = useState(''); // last 4 digits of the order's mobile number (kept in memory only, never in the URL)
+  const pays = useOrderPays(o && o.id ? [o.id] : []);
 
   let oid = id;
   try { oid = decodeURIComponent(id); } catch {}
@@ -2111,7 +2225,7 @@ function TrackView({ id = '' }) {
                 {o.addr.city}, {o.addr.state} - {o.addr.pin}
               </p>
             </div>
-            <OrderBox o={o} full />
+            <OrderBox o={o} full pay={pays[o.id]} />
           </>
         ) : (
           <Empty
@@ -2137,6 +2251,7 @@ function OrdersView() {
   const { ready, orderIds } = useStore();
   const [orders, setOrders] = useState(null);
   const key = orderIds.join(',');
+  const pays = useOrderPays(orderIds);
 
   useEffect(() => {
     if (!ready) return;
@@ -2158,7 +2273,7 @@ function OrdersView() {
         sub={orders.length ? `${orders.length} order${orders.length > 1 ? 's' : ''} placed` : 'Your order history'}
       />
       {orders.length ? (
-        orders.map((o) => <OrderBox key={o.id} o={o} />)
+        orders.map((o) => <OrderBox key={o.id} o={o} pay={pays[o.id]} />)
       ) : (
         <Empty icon="bag" title="No orders yet" text="Your orders will appear here once you place one." shop />
       )}

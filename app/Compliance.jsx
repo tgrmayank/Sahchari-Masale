@@ -72,7 +72,7 @@ export function privacyDoc(L, extra) {
     ['What data we collect', [
       'Name, mobile number, delivery address and pincode that you enter at checkout.',
       'Your order details (products, packs, amount) and any review you choose to write.',
-      'We do not collect card, UPI or bank details. Payment is Cash on Delivery only.',
+      'We do not collect or store your card or bank details. For online payment you pay with your own UPI app; we only record the payment method, the UPI app you chose and the transaction (UTR) number if you enter it, to verify your payment.',
       'We do not use ad trackers, tracking pixels, or location tracking.']],
     ['Why we use it', [
       'Only to confirm, pack, deliver and track your order, and to give replacement or refund support.',
@@ -112,11 +112,11 @@ export function privacyDoc(L, extra) {
 export function termsDoc(L) {
   return {
     intro: `These terms apply when you order from ${L.name}. By placing an order you agree to them.`,
-    chips: ['Cash on Delivery', 'Delivery partner shipping', 'Replacement or refund', 'FSSAI licensed'],
+    chips: ['COD & Online Payment', 'Delivery partner shipping', 'Replacement or refund', 'FSSAI licensed'],
     sections: [
       ['Seller details', [`Legal name: ${L.name}`, `Address: ${L.addr}`, `GST No.: ${L.gst}`, `FSSAI Lic. No.: ${L.fssai}`, contact(L)]],
       ['Orders and prices', ['All prices are in Indian Rupees and include applicable taxes unless stated.', 'Your order is confirmed after we accept it. We may cancel an order if stock is unavailable or the address cannot be served.']],
-      ['Payment', ['Cash on Delivery only. Please keep the exact amount ready.']],
+      ['Payment', ['Payment methods are shown at checkout: Cash on Delivery and/or Online Payment by UPI. The store may switch either one on or off.', 'Online payments are made to the UPI ID shown on the payment screen. Your order is confirmed after the payment is verified. If a payment cannot be verified we may contact you or cancel the order.', 'Some Cash on Delivery orders need an advance. The advance is paid online at checkout and the balance is paid in cash on delivery. Please keep the exact amount ready.']],
       ['Eligibility', ['You must be 18 or older, or order with a parent or guardian.']],
       ['Delivery, replacement and refund', ['See the Shipping & Delivery Policy and the Replacement & Refund Policy. Both are part of these terms.']],
       ['Product information', [`Best before: ${L.best}. Store in a cool, dry place in an airtight container.`]],
@@ -142,7 +142,7 @@ export function refundDoc(L) {
         `Within ${REPORT_WINDOW} of delivery, send the video and your Order ID on WhatsApp ${L.phone} or to ${L.mail}.`,
         'We check the video and confirm replacement or refund, normally within 2 working days.']],
       ['How refunds are paid', [
-        'Since orders are Cash on Delivery, the refund goes to your bank account or UPI ID after you share the details.',
+        'The refund goes to your bank account or UPI ID after you share the details.',
         'It is usually completed in 5 to 7 working days after approval.']],
       ['Not covered', [
         'Change of mind, or opened packs that were delivered correctly.',
@@ -154,7 +154,7 @@ export function refundDoc(L) {
 export function shippingDoc(L, S) {
   return {
     intro: 'We ship through trusted delivery partners. Timelines depend on the partner serving your pincode, so they can run a little earlier or later than the estimate.',
-    chips: ['Delivery partner based', 'Order tracking', 'Cash on Delivery', 'Pan-India shipping'],
+    chips: ['Delivery partner based', 'Order tracking', 'COD & Online Payment', 'Pan-India shipping'],
     sections: [
       ['Delivery time', [
         S && S.delivery_days ? `Estimated delivery: ${S.delivery_days}.` : 'The estimate is shown at checkout.',
@@ -162,7 +162,7 @@ export function shippingDoc(L, S) {
         'Weather, strikes, festivals and remote pincodes can add delay. We will help you follow up with the partner.']],
       ['Delivery charges', ['Any delivery charge, or free delivery, is shown on the Bill & Payment page before you place the order.']],
       ['Tracking', ['Use the Track Order page with your Order ID. The delivery partner may also send you updates by SMS or call.']],
-      ['Your part', ['Give a correct address, pincode and a working mobile number.', 'Keep the exact cash ready and film the unboxing as explained in our Replacement & Refund Policy.']],
+      ['Your part', ['Give a correct address, pincode and a working mobile number.', 'If you chose Cash on Delivery, keep the exact cash ready. Please also film the unboxing as explained in our Replacement & Refund Policy.']],
       ['Delivery not possible', ['If the parcel cannot be delivered after attempts by the partner, it returns to us and we will contact you to re-send.']],
       ['Help', [contact(L)]],
     ],

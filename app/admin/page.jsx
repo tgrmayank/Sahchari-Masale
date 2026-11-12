@@ -5,7 +5,7 @@ import logo from '../logo.png';
 import { UIProvider, Ico, Loading } from './ui';
 import PushGate from './PushGate';
 import { InstallButton } from './PwaInstall';
-import { savedToken, registerPush, unregisterPush, isStandalone } from '@/lib/push';
+import { pushGranted, registerPush, unregisterPush, isStandalone } from '@/lib/push';
 import Dashboard from './sections/Dashboard';
 import Orders from './sections/Orders';
 import Products from './sections/Products';
@@ -120,10 +120,10 @@ export default function AdminPage() {
   // Once the admin is confirmed: this device must allow notifications before the panel opens.
   useEffect(() => {
     if (state !== 'ok') return;
-    const granted = typeof Notification !== 'undefined' && Notification.permission === 'granted';
+    const granted = pushGranted();
     let skipped = false;
     try { skipped = sessionStorage.getItem('sm_push_skip') === '1'; } catch {}
-    if (granted && savedToken()) {
+    if (granted) {
       setPush('ready');
       registerPush().catch(() => {}); // silent refresh of the saved device token
     } else if (skipped && !isStandalone()) {

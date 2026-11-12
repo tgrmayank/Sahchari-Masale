@@ -21,7 +21,7 @@ export default function AdminPwaBoot() {
       navigator.serviceWorker.register('/service-worker.js').catch(() => {});
     }
 
-    const app = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    const app = !!window.SMApp || window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     if (app) {
       const root = document.querySelector('.adm');
       if (root) root.classList.add('is-app');

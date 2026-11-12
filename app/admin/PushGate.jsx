@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { isStandalone, loadSdk, pushSupport, registerPush, sendTestPush } from '@/lib/push';
+import { isApp, isStandalone, loadSdk, pushSupport, registerPush, sendTestPush } from '@/lib/push';
 import logo from '../logo.png';
 
 /* Full-screen step shown BEFORE the admin panel until this device allows notifications. */
@@ -13,7 +13,7 @@ export default function PushGate({ onDone, onSkip }) {
   useEffect(() => {
     setMustAllow(isStandalone());
     setBlocked(typeof Notification !== 'undefined' && Notification.permission === 'denied');
-    loadSdk().catch(() => {}); // preload so the popup opens instantly on tap
+    if (!isApp()) loadSdk().catch(() => {}); // preload so the popup opens instantly on tap
   }, []);
 
   const allow = async () => {

@@ -1,5 +1,7 @@
 'use client';
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+
+const useIsoLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 import NextLink from 'next/link';
 import { useRouter as useNextRouter, usePathname as useNextPathname } from 'next/navigation';
 import logo from './logo.png';
@@ -49,7 +51,11 @@ function usePathname() {
     if (h.startsWith('#/')) r.replace(h.slice(1));
     setOk(true);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  return ok ? (np || '/') : null;
+  const p = np || '/';
+  // Rewritten routes (/product/3 ...) can look different on server and browser, so wait one tick for them.
+  // Every other page is drawn immediately, already in the server HTML.
+  if (/^\/(product|track|order-success)(\/|$)/.test(p)) return ok ? p : null;
+  return p;
 }
 
 /* ===== Icon ===== */
@@ -328,7 +334,9 @@ const save = (k, v) => {
 
 const EMPTY_RAW = { settings: null, cats: [], products: [], slides: [], coupons: [], ratings: [] };
 
-function StoreProvider({ children }) {
+const CAT_KEY = 'sm_catalog_v1';
+
+function StoreProvider({ children, initial }) {
   /* persisted in this browser only: cart, address, coupon, own order IDs */
   const [ready, setReady] = useState(false);
   const [cart, setCart] = useState([]); // [{id, k (pack index), q}]
@@ -338,15 +346,20 @@ function StoreProvider({ children }) {
   const [coupon, setCoupon] = useState('');
 
   /* catalog from Supabase */
-  const [raw, setRaw] = useState(null); // null = still loading
+  const [raw, setRaw] = useState(initial ? initial.raw : null); // null = still loading
   const [loadErr, setLoadErr] = useState('');
   const [extra, setExtra] = useState({}); // hidden coupons found by code
-  const [payRow, setPayRow] = useState(undefined); // payment settings: undefined = loading, null = not set up (COD only)
+  const [payRow, setPayRow] = useState(initial ? initial.payRow : undefined); // payment settings: undefined = loading, null = not set up (COD only)
 
   /* session only */
   const [filters, setFilters] = useState({ q: '', c: 'All', s: '', t: '' });
   const [toast, setToast] = useState({ msg: '', on: false });
   const timer = useRef(null);
+  const freshRaw = useRef(null);
+  const rawRef = useRef(raw);
+  rawRef.current = raw;
+  const payRowRef = useRef(payRow);
+  payRowRef.current = payRow;
 
   useEffect(() => {
     setCart(load('sm_cart', []));
@@ -374,11 +387,21 @@ function StoreProvider({ children }) {
   useEffect(() => { if (ready && rememberOk()) save('sm_addr', addr); }, [ready, addr]);
   useEffect(() => { if (ready) save('sm_coupon', coupon); }, [ready, coupon]);
 
-  /* ---------- load the shop from Supabase ---------- */
+  /* returning visitor, server data missing: paint the last saved catalog before first frame */
+  useIsoLayoutEffect(() => {
+    if (raw !== null) return;
+    try {
+      const c = JSON.parse(localStorage.getItem(CAT_KEY));
+      if (c && c.raw) { setRaw(c.raw); if (c.payRow !== undefined) setPayRow(c.payRow); }
+    } catch {}
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ---------- load the shop from Supabase (silent refresh in background) ---------- */
   useEffect(() => {
     let off = false;
     (async () => {
       if (!configured) {
+        if (rawRef.current !== null) return;
         setLoadErr('Supabase keys are missing in the .env file');
         setRaw(EMPTY_RAW);
         return;
@@ -396,16 +419,20 @@ function StoreProvider({ children }) {
         const bad = res.find((r) => r.error);
         if (bad) throw bad.error;
         if (off) return;
-        setRaw({
+        const fresh = {
           settings: res[0].data,
           cats: res[1].data || [],
           products: res[2].data || [],
           slides: res[3].data || [],
           coupons: res[4].data || [],
           ratings: res[5].data || [],
-        });
+        };
+        freshRaw.current = fresh;
+        setRaw(fresh);
+        setLoadErr('');
       } catch (e) {
         if (off) return;
+        if (rawRef.current !== null && rawRef.current !== EMPTY_RAW) return; // keep showing what we already have
         setLoadErr((e && e.message) || 'Could not load the shop');
         setRaw(EMPTY_RAW);
       }
@@ -418,10 +445,17 @@ function StoreProvider({ children }) {
     if (!configured) { setPayRow(null); return; }
     let off = false;
     supabase.from('payment_settings').select('*').eq('id', 1).maybeSingle().then(({ data, error }) => {
-      if (!off) setPayRow(error ? null : data || null);
+      if (off) return;
+      if (error && payRowRef.current !== undefined) return;
+      setPayRow(error ? null : data || null);
     });
     return () => { off = true; };
   }, []);
+
+  useEffect(() => {
+    if (!freshRaw.current || payRow === undefined) return;
+    try { localStorage.setItem(CAT_KEY, JSON.stringify({ raw: freshRaw.current, payRow })); } catch {}
+  }, [raw, payRow]);
 
   const cat = useMemo(() => {
     const c = buildCatalog(raw || EMPTY_RAW, extra);
@@ -945,14 +979,13 @@ function NewYearBanner() {
 
 /* ===== SiteShell ===== */
 function SiteShell({ children }) {
-  const { loaded, loadErr } = useCat();
+  const { loadErr } = useCat();
   const pathname = usePathname();
   const { hideToast } = useStore();
 
   // toast never follows you to another page
   useEffect(() => { hideToast(); }, [pathname, hideToast]);
 
-  if (!loaded) return <div className="ldg"><span /></div>;
   return (
     <>
       {loadErr ? <div className="lderr">Store data could not be loaded: {loadErr}. Check the .env file and the SQL setup.</div> : null}
@@ -2533,7 +2566,7 @@ function Router() {
     const t = titleFor(path, findProduct, BN, loaded);
     if (t) document.title = t;
   }, [path, BN, findProduct, loaded]);
-  if (path === null) return <div style={{ minHeight: '60vh' }} />;
+  if (path === null || !loaded) return <div style={{ minHeight: '60vh' }} />;
   return renderRoute(path, findProduct);
 }
 
